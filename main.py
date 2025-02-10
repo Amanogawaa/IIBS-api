@@ -2,6 +2,8 @@ from fastapi import FastAPI, Query
 from api.database import engine
 import api.models as models
 from api.views import Routes
+
+# practice code imports
 from enum import Enum
 from typing import Union
 from pydantic import BaseModel
@@ -12,11 +14,7 @@ app.include_router(Routes, prefix='/api')
 
 models.Base.metadata.create_all(bind=engine)
 
-@app.get('/')
-async def root():
-    return {'message': 'Hello World'}
-
-
+print('Server is running...')
 #  practice code
 #
 # class ModelsName(str, Enum):

@@ -15,3 +15,6 @@ backend
 └─ requirement.txt
 
 ```
+
+cli
+openssl rand -hex 32
