@@ -7,7 +7,6 @@ import os
 load_dotenv()
 
 url = os.getenv("DATABASE_URL")
-print(f"Loaded DATABASE_URL: {url}")  # check if the url is loaded correctly
 
 engine = create_engine(url, echo=True)
 
