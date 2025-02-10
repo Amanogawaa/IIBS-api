@@ -76,7 +76,7 @@ class JWT_Bearer(HTTPBearer):
             payload = decode_jwt(jwtoken)
             if payload and "exp" in payload:
                 if datetime.utcfromtimestamp(payload["exp"]) < datetime.utcnow():
-                    return False  # ✅ Token expired
+                    return False 
             return payload is not None
         except:
             return False
