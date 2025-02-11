@@ -16,5 +16,10 @@ backend
 
 ```
 
-cli
+cli for generation random key
 openssl rand -hex 32
+
+cli for migration - baka makalimutan ko
+alembic revision --autogenerate -m {message for migration}
+alembic upgrade head
+alembic check
