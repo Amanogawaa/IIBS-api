@@ -23,3 +23,5 @@ cli for migration - baka makalimutan ko
 alembic revision --autogenerate -m {message for migration}
 alembic upgrade head
 alembic check
+
+TODO (later): Add websocket and make code cleaner
