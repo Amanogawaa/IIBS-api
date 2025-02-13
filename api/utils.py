@@ -1,39 +1,42 @@
-from datetime  import datetime, timedelta
+from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from fastapi import  HTTPException, Request
+from fastapi import HTTPException, Request
 from dotenv import load_dotenv
 from typing import Union, Any
 import os
-
 
 load_dotenv()
 
 ALGORITHM = 'HS256'
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
-REFRESH_TOKEN_EXPIRE_MINUTES = 60* 24 * 7
-secret_key =  os.getenv("JWT_SECRET_KEY")
+REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7
+secret_key = os.getenv("JWT_SECRET_KEY")
 refresh_key = os.getenv("JWT_REFRESH_KEY")
 
 hass_password = CryptContext(schemes=['bcrypt'], deprecated='auto')
 
-def hash_password(password: str)->str:
+
+def hash_password(password: str) -> str:
     return hass_password.hash(password)
 
-def verify_password(plain_password: str, hashed_password: str)->bool:
+
+def verify_password(plain_password: str, hashed_password: str) -> bool:
     return hass_password.verify(plain_password, hashed_password)
 
-def create_access_token(subject:Union[str, Any], expires_delta: int = None)-> str:
+
+def create_access_token(user_id: int, subject: Union[str, Any], expires_delta: int = None, ) -> str:
     if expires_delta is not None:
         expires_delta = datetime.utcnow() + expires_delta
     else:
         expires_delta = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
 
-    encode = {'exp': expires_delta, 'sub': str(subject)}
+    encode = {'user_id': user_id, 'exp': expires_delta, 'sub': str(subject)}
     encode_jwt = jwt.encode(encode, secret_key, algorithm=ALGORITHM)
 
     return encode_jwt
+
 
 def refresh_token(subject: Union[str, Any], expire_delta: int = None) -> str:
     if expire_delta is not None:
@@ -59,7 +62,6 @@ class JWT_Bearer(HTTPBearer):
     def __init__(self, auto_error: bool = True):
         super(JWT_Bearer, self).__init__(auto_error=auto_error)
 
-
     async def __call__(self, request: Request):
         credentials: HTTPAuthorizationCredentials = await super(JWT_Bearer, self).__call__(request)
         if credentials:
@@ -76,9 +78,10 @@ class JWT_Bearer(HTTPBearer):
             payload = decode_jwt(jwtoken)
             if payload and "exp" in payload:
                 if datetime.utcfromtimestamp(payload["exp"]) < datetime.utcnow():
-                    return False 
+                    return False
             return payload is not None
         except:
             return False
+
 
 jwt_bearer = JWT_Bearer()

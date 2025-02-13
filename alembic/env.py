@@ -6,7 +6,7 @@ from sqlalchemy import pool
 from alembic import context
 
 from api.database import Base
-from api.models import User, Service, Requirement, RequirementCategory, service_requirement_association
+from api.models import *
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
