@@ -213,3 +213,8 @@ async def delete_announcement(ann_id: int, db: Session = Depends(con_db)):
 """ 
 FAQS Routes
 """
+
+
+@Routes.get("/faqs")
+async def get_faqs():
+    return "faqs"

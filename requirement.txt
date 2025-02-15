@@ -8,4 +8,4 @@ python-multipart
 python-jose[cryptography]
 passlib[bcrypt]
 alembic
-'pydantic[email]'
+pydantic[email]
