@@ -12,7 +12,9 @@ def create_service(db: Session, body: ServiceCreate):
     if db.query(models.Service).filter(models.Service.name == body.name).first():
         raise HTTPException(status_code=400, detail="Service already exists")
 
-    service = models.Service(name=body.name, description=body.description, user_id=body.user_id)
+    service = models.Service(
+        name=body.name, description=body.description, user_id=body.user_id
+    )
     db.add(service)
     db.commit()
     db.refresh(service)
@@ -23,6 +25,7 @@ def create_service(db: Session, body: ServiceCreate):
             id=service.id,
             name=service.name,
             description=service.description,
+            categories=[],
             created_at=service.created_at,
             updated_at=service.updated_at,
         ),
@@ -33,7 +36,9 @@ def create_service(db: Session, body: ServiceCreate):
 def get_all_services(db: Session, service_id: Union[int, None] = None):
     query = db.query(models.Service).options(
         joinedload(models.Service.categories),
-        joinedload(models.Service.categories).joinedload(models.ServiceCategory.requirements)
+        joinedload(models.Service.categories).joinedload(
+            models.ServiceCategory.requirements
+        ),
     )
 
     if service_id:
@@ -44,7 +49,10 @@ def get_all_services(db: Session, service_id: Union[int, None] = None):
     if not services:
         raise HTTPException(status_code=404, detail="Service not found")
 
-    service_responses = [ServiceResponse.model_validate(service, from_attributes=True) for service in services]
+    service_responses = [
+        ServiceResponse.model_validate(service, from_attributes=True)
+        for service in services
+    ]
 
     return {
         "message": "Service Found" if service_id else "All Services",
@@ -66,9 +74,7 @@ def update_service(db: Session, service_id: int, service_data: ServiceCreate):
     db.commit()
     db.refresh(service)
 
-    return ResponseModel(
-        message="Service Updated Successfully", status_code=200
-    )
+    return ResponseModel(message="Service Updated Successfully", status_code=200)
 
 
 def delete_service(db: Session, service_id: int):
@@ -80,6 +86,4 @@ def delete_service(db: Session, service_id: int):
     db.delete(service)
     db.commit()
 
-    return ResponseModel(
-        message="Service Deleted Successfully", status_code=200
-    )
+    return ResponseModel(message="Service Deleted Successfully", status_code=200)

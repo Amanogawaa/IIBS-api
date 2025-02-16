@@ -1,15 +1,15 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 # schemas
 from api.database import SessionLocal
-from api import utils
 from api.utils import JWT_Bearer
 from api.schema.user import *
 from api.schema.service import *
 from api.schema.service_category import *
 from api.schema.requirement import *
 from api.schema.announcement import *
+from api.schema.faqs import *
 
 # crud
 import api.crud.user as user
@@ -17,6 +17,7 @@ import api.crud.services as services
 import api.crud.category as category
 import api.crud.requirements as requirements
 import api.crud.announcement as announcement
+import api.crud.faqs as faqs
 
 Routes = APIRouter()
 
@@ -215,6 +216,26 @@ FAQS Routes
 """
 
 
-@Routes.get("/faqs")
-async def get_faqs():
-    return "faqs"
+@Routes.get("/faqs", tags=["faqs"])
+async def get_faqs(db: Session = Depends(con_db)):
+    return faqs.get_all_faqs(db)
+
+
+@Routes.get("/faqs/{faqs_id}", tags=["faqs"])
+async def get_faq(faqs_id: int, db: Session = Depends(con_db)):
+    return faqs.get_all_faqs(db, faqs_id)
+
+
+@Routes.post("/faqs/", tags=["faqs"], dependencies=[Depends(JWT_Bearer())])
+async def create_faq(faq: FaqCreate, db: Session = Depends(con_db)):
+    return faqs.create_faq(db, faq)
+
+
+@Routes.put("/faqs/{faqs_id}", tags=["faqs"], dependencies=[Depends(JWT_Bearer())])
+async def update_faq(faqs_id: int, faq: FaqCreate, db: Session = Depends(con_db)):
+    return faqs.update_faq(db, faqs_id, faq)
+
+
+@Routes.delete("/faqs/{faqs_id}", tags=["faqs"], dependencies=[Depends(JWT_Bearer())])
+async def delete_faq(faqs_id: int, db: Session = Depends(con_db)):
+    return faqs.delete_faq(db, faqs_id)

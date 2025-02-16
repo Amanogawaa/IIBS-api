@@ -7,10 +7,12 @@ Wala lng pasikat lng ako
 To run this project, add the following environment variables to your `.env` file:
 
 ```plaintext
-DATABASE_URL=
+DATABASE_URL=postgresql://username:password@localhost:5432/db_name
 JWT_SECRET_KEY=
 JWT_REFRESH_KEY=
 ```
+
+- Database name should be gcins_db
 
 You can generate a random hex key using the following command:
 

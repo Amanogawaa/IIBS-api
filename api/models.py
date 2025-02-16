@@ -100,6 +100,7 @@ class Service(Base):
         secondary=service_category_association,
         back_populates="services",
     )
+    faqs = relationship("Faqs", back_populates="service", cascade="all, delete")
 
 
 class ServiceCategory(Base):
@@ -144,15 +145,23 @@ class Requirement(Base):
     )
 
 
-class FAQS(Base):
+class Faqs(Base):
     __tablename__ = "faqs"
 
     id = Column(Integer, primary_key=True, index=True)
     question = Column(String(255), nullable=False, unique=True)
     answer = Column(Text, nullable=False)
+    service_id = Column(
+        Integer,
+        ForeignKey("services.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
         DateTime,
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
     )
+
+    service = relationship("Service", back_populates="faqs")
