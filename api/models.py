@@ -65,6 +65,7 @@ class Announcement(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(255), nullable=False, unique=True)
     description = Column(Text, nullable=False)
+    image_path = Column(String(255), nullable=True)
     user_id = Column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )

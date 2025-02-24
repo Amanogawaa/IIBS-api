@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, UploadFile, File, Form
 from sqlalchemy.orm import Session
 
 # schemas
@@ -184,11 +184,15 @@ async def get_announcement(ann_id: int, db: Session = Depends(con_db)):
     return announcement.get_announcements(db, ann_id)
 
 
-@Routes.post(
-    "/announcements/", tags=["announcements"], dependencies=[Depends(JWT_Bearer())]
-)
-async def create_announcement(ann: Announcement, db: Session = Depends(con_db)):
-    return announcement.create_announcement(db, ann)
+@Routes.post("/announcements/", tags=["announcements"])
+async def create_announcement(
+    name: str = Form(...),
+    description: str = Form(...),
+    user_id: int = Form(...),
+    file: UploadFile = File(...),
+    db: Session = Depends(con_db),
+):
+    return announcement.create_announcement(db, name, description, user_id, file)
 
 
 @Routes.put(
