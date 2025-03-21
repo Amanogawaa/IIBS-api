@@ -83,6 +83,7 @@ class Download(Base):
     file = Column(String(255), nullable=False, unique=True)
     description = Column(Text, nullable=False)
     category = Column(String(255), nullable=False)
+    service_id = Column(Integer,  ForeignKey("services.id", ondelete="CASCADE"), nullable=False)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
         DateTime,
@@ -123,9 +124,7 @@ class Service(Base):
     category_id = Column(
         Integer, ForeignKey("categories.id", ondelete="CASCADE"), nullable=False
     )
-    download_id = Column(
-        Integer, ForeignKey("downloads.id", ondelete="SET NULL"), nullable=True
-    )
+    file_path = Column(String(255), nullable=True)
     user_id = Column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
@@ -137,7 +136,6 @@ class Service(Base):
     )
 
     category = relationship("Category", back_populates="services")
-    download = relationship("Download", back_populates="services")
     user = relationship("User", back_populates="services")
     faqs = relationship("Faq", back_populates="service", cascade="all, delete")
     attributes = relationship(
@@ -146,7 +144,8 @@ class Service(Base):
     locations = relationship(
         "Location", secondary=service_location, back_populates="services"
     )
-
+    download = relationship("Download", back_populates="services", cascade="all, delete")
+    
 class ServiceAttribute(Base):
     __tablename__ = "service_attributes"
 

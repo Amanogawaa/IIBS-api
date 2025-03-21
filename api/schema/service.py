@@ -1,24 +1,21 @@
-from typing import List, Optional, Union, TypeVar, Generic
-from pydantic import BaseModel, ConfigDict, EmailStr
-from datetime import datetime, timedelta
-from api.schema.requirement import *
-from api.schema.service_category import *
-
+from datetime import datetime
+from pydantic import BaseModel, ConfigDict
 
 class ServiceBase(BaseModel):
     name: str
     description: str
-
+    status: str = 'Active'
+    file_path: str
+    image_path: str
+    user_id: int = 1
+    category_id: int = 1
 
 class ServiceCreate(ServiceBase):
-    user_id: int
     pass
-
 
 class ServiceResponse(ServiceBase):
     id: int
     created_at: datetime
     updated_at: datetime
-    categories: List[Cat_Service_Res]
 
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True) 
