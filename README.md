@@ -1,4 +1,4 @@
-# GC-INS Api
+# IIBS Api - Interactive Information Board System
 
 Wala lng pasikat lng ako
 
