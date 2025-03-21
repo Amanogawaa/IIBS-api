@@ -12,7 +12,7 @@ JWT_SECRET_KEY=
 JWT_REFRESH_KEY=
 ```
 
-- Database name should be gcins_db
+- Database name should be iibs
 
 You can generate a random hex key using the following command:
 
@@ -51,3 +51,5 @@ python -m venv venv
 Once you've installed and started the API, you can view the available routes in the documentation:
 
 [API Documentation](http://127.0.0.1:8000/docs)
+
+// todo transition to pipfile not pip
