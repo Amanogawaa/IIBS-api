@@ -87,26 +87,6 @@ class Faq(Base):
 
     service = relationship("Service", back_populates="faqs")
 
-class Download(Base):
-    __tablename__ = "downloads"
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(255), nullable=False, unique=True)
-    file = Column(String(255), nullable=False, unique=True)
-    description = Column(Text, nullable=False)
-    category = Column(String(255), nullable=False)
-    service_id = Column(Integer,  ForeignKey("services.id", ondelete="CASCADE"), nullable=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(
-        DateTime,
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
-    )
-
-    services = relationship(
-        "Service", back_populates="download", cascade="all, delete"
-    )
-
 class Category(Base):
     __tablename__ = "categories"
 
@@ -219,3 +199,23 @@ class BusinessInfoAttribute(Base):
     attribute_type = Column(String(255), nullable=False)
 
     business_info = relationship("BusinessInfo", back_populates="attributes")
+
+class Download(Base):
+    __tablename__ = "downloads"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), nullable=False, unique=True)
+    file = Column(String(255), nullable=False, unique=True)
+    description = Column(Text, nullable=False)
+    category = Column(String(255), nullable=False)
+    service_id = Column(Integer,  ForeignKey("services.id", ondelete="CASCADE"), nullable=False)
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
+
+    services = relationship(
+        "Service", back_populates="download", cascade="all, delete"
+    )

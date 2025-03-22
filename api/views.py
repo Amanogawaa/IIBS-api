@@ -14,6 +14,7 @@ from api.schema.announcement import *
 from api.schema.faqs import *
 from api.schema.category import *
 from api.schema.service import * 
+from api.schema.business_info import * 
 
 # crud
 import api.crud.user as user
@@ -21,6 +22,7 @@ import api.crud.category as category
 import api.crud.service as service
 import api.crud.announcement as announcements
 import api.crud.faqs as faqs
+import api.crud.business_info as infos
 
 Routes = APIRouter()
 
@@ -187,3 +189,27 @@ async def update_faq(faqs_id: int, faq: FaqCreate, db: Session = Depends(con_db)
 @Routes.delete("/faqs/{faqs_id}", tags=["faqs"], dependencies=[Depends(JWT_Bearer())])
 async def delete_faq(faqs_id: int, db: Session = Depends(con_db)):
     return faqs.delete_faq(db, faqs_id)
+
+"""
+Information Routes
+"""
+
+@Routes.get('/information/', tags=['information'])
+async def get_infos(db: Session = Depends(con_db)):
+    return infos.get_information(db)
+
+@Routes.get('/information/{info_id}', tags=['information'])
+async def get_infos(info_id: int, db: Session = Depends(con_db)):
+    return infos.get_information(db, info_id)
+
+@Routes.post('/information/', tags=['information'])
+async def creat_information(info_data: BusinessInfoCreate, db: Session = Depends(con_db)):
+    return infos.createInfo(db, info_data)
+
+@Routes.put("/information/{info_id}", tags=["information"],)
+async def update_info(info_id: int, info_data: BusinessInfoCreate, db: Session = Depends(con_db)):
+    return infos.update_information(db, info_id, info_data)
+
+@Routes.delete("/information/{info_id}", tags=["information"])
+async def delete_info(info_id: int, db: Session = Depends(con_db)):
+    return infos.delete_information(db, info_id)
