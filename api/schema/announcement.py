@@ -1,17 +1,32 @@
-from typing import List, Optional, Union, TypeVar, Generic
-from pydantic import BaseModel, ConfigDict, EmailStr
-from datetime import datetime, timedelta
+from pydantic import BaseModel, ConfigDict
+from typing import Dict, List, Optional
+from datetime import datetime
 
+class AnnouncementLinkCreate(BaseModel):
+    url: str
+    title: Optional[str] = None
 
-class Announcement(BaseModel):
+class AnnouncementBase(BaseModel):
     name: str
     description: str
+    image: Optional[str] = None
+    is_urgent: bool
+    platform: str
     user_id: int
 
+class AnnouncementCreate(AnnouncementBase):
+    pass
 
-class AnnouncementResponse(Announcement):
+class AnnouncementLinkResponse(BaseModel):
     id: int
-    image_path: Optional[str]
+    url: str
+    title: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+class AnnouncementResponse(AnnouncementBase):
+    id: int
+    links: Optional[List[AnnouncementLinkResponse]] = None  
     created_at: datetime
     updated_at: datetime
 

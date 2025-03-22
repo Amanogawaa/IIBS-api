@@ -9,10 +9,10 @@ from api.schema.response import ResponseModel
 
 
 def get_all_faqs(db: Session, faqs_id: Optional[int | None] = None):
-    query = db.query(models.Faqs)
+    query = db.query(models.Faq)
 
     if faqs_id:
-        query = query.filter(models.Faqs.id == faqs_id)
+        query = query.filter(models.Faq.id == faqs_id)
 
     reqs = query.all()
 
@@ -27,12 +27,12 @@ def get_all_faqs(db: Session, faqs_id: Optional[int | None] = None):
 
 
 def create_faq(db: Session, data: FaqCreate):
-    query = db.query(models.Faqs).filter(models.Faqs.question == data.question).first()
+    query = db.query(models.Faq).filter(models.Faq.question == data.question).first()
 
     if query:
         raise HTTPException(status_code=400, detail="FAQ already exists")
 
-    faq = models.Faqs(
+    faq = models.Faq(
         question=data.question, answer=data.answer, service_id=data.service_id
     )
 
@@ -48,7 +48,7 @@ def create_faq(db: Session, data: FaqCreate):
 
 
 def update_faq(db: Session, faq_id: int, data: FaqCreate):
-    query = db.query(models.Faqs).filter(models.Faqs.id == faq_id).first()
+    query = db.query(models.Faq).filter(models.Faq.id == faq_id).first()
 
     if not query:
         raise HTTPException(status_code=404, detail="FAQ not found")
@@ -68,7 +68,7 @@ def update_faq(db: Session, faq_id: int, data: FaqCreate):
 
 
 def delete_faq(db: Session, faq_id: int):
-    query = db.query(models.Faqs).filter(models.Faqs.id == faq_id).first()
+    query = db.query(models.Faq).filter(models.Faq.id == faq_id).first()
 
     if not query:
         raise HTTPException(status_code=404, detail="FAQ not found")

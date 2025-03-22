@@ -1,15 +1,17 @@
-from fastapi import APIRouter, Depends, UploadFile, File, Form
+import json
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
+
+# utils
+from api.utils import JWT_Bearer
+from api.form_parser import parse_announcement_form
 
 # schemas
 from api.database import SessionLocal
-from api.utils import JWT_Bearer
 from api.schema.user import *
 from api.schema.service import *
 from api.schema.announcement import *
 from api.schema.faqs import *
-
-# v2
 from api.schema.category import *
 from api.schema.service import * 
 
@@ -17,7 +19,7 @@ from api.schema.service import *
 import api.crud.user as user
 import api.crud.category as category
 import api.crud.service as service
-import api.crud.announcement as announcement
+import api.crud.announcement as announcements
 import api.crud.faqs as faqs
 
 Routes = APIRouter()
@@ -35,13 +37,13 @@ def con_db():
 Auth Routes
 """
 
-@Routes.get("/auth/{user_id}/", tags=["auth"])
-async def get_user(db: Session = Depends(con_db), user_id: int | None = None):
-    return user.get_all_users(db, user_id)
-
 @Routes.get("/auth/", tags=["auth"])
 async def get_users(db: Session = Depends(con_db)):
     return user.get_all_users(db)
+
+@Routes.get("/auth/{user_id}/", tags=["auth"])
+async def get_user(db: Session = Depends(con_db), user_id: int | None = None):
+    return user.get_all_users(db, user_id)
 
 @Routes.post("/auth/", tags=["auth"])
 async def create_user(user_data: UserCreate, db: Session = Depends(con_db)):
@@ -56,13 +58,17 @@ async def login(db: Session = Depends(con_db), req: LoginBase | None = None):
 Category Routes
 """
 
+@Routes.get('/category/', tags=['category'])    
+async def get_category(db: Session = Depends(con_db)):
+    return category.getCategories(db)
+
+@Routes.get('/category/{cat_id}', tags=['category'])    
+async def get_category(cat_id: Optional[int | None] = None, db: Session = Depends(con_db)):
+    return category.getCategories(db, cat_id)
+
 @Routes.post('/category/', tags=['category'])
 async def create_category( cat_data: CreateCategory, db: Session = Depends(con_db)):
     return category.createCategory(db, cat_data)
-
-@Routes.get('/category/', tags=['category'])    
-async def get_category(cat_id: Optional[int | None] = None, db: Session = Depends(con_db)):
-    return category.getCategories(db, cat_id)
 
 @Routes.put('/category/{cat_id}', tags=['category'])
 async def update_category(cat_id: int, cat_data: CreateCategory, db: Session = Depends(con_db)):
@@ -76,6 +82,14 @@ async def delete_category(cat_id: int, db: Session = Depends(con_db)):
 Services Routes
 """
 
+@Routes.get('/services/', tags=['services'])
+async def get_services(db: Session = Depends(con_db)):
+    return service.get_service(db)
+
+@Routes.get('/services/{service_id}', tags=['services'])
+async def get_services(service_id: Optional[int | None] = None, db: Session = Depends(con_db)):
+    return service.get_service(db, service_id)
+
 @Routes.post('/services/', tags=['services'])
 async def create_service(service_data: ServiceCreate, db: Session = Depends(con_db)):
     return service.createService(db, service_data)
@@ -84,61 +98,77 @@ async def create_service(service_data: ServiceCreate, db: Session = Depends(con_
 async def update_service(service_id: int, service_data: ServiceCreate,db: Session = Depends(con_db) ):
     return service.update_service(db, service_id, service_data)
 
-@Routes.get('/services/', tags=['services'])
-async def get_services(service_id: Optional[int | None] = None, db: Session = Depends(con_db)):
-    return service.get_service(db, service_id)
-
 @Routes.delete('/services/{service_id}', tags=['services'])
 async def delete_category(service_id: int, db: Session = Depends(con_db)):
     return service.delete_service(db, service_id)
-
-
 
 """
 Announcement Routes
 """
 
 @Routes.get("/announcements/", tags=["announcements"])
-async def get_announcements(db: Session = Depends(con_db)):
-    return announcement.get_announcements(db)
+async def get_faqs(db: Session = Depends(con_db)):
+    return announcements.get_announcements(db)
 
-@Routes.get("/announcements/{ann_id}", tags=["announcements"])
-async def get_announcement(ann_id: int, db: Session = Depends(con_db)):
-    return announcement.get_announcements(db, ann_id)
+@Routes.get("/announcements/{announcement_id}", tags=["announcements"])
+async def get_faq(announcement_id: int, db: Session = Depends(con_db)):
+    return announcements.get_announcements(db, announcement_id)
 
 @Routes.post("/announcements/", tags=["announcements"])
 async def create_announcement(
-    name: str = Form(...),
-    description: str = Form(...),
-    user_id: int = Form(...),
-    file: UploadFile = File(...),
+    announcement: AnnouncementCreate = Depends(parse_announcement_form),
+    links: Optional[str] = Form(None), 
+    file: Optional[UploadFile] = File(None),
     db: Session = Depends(con_db),
 ):
-    return announcement.create_announcement(db, name, description, user_id, file)
+    links_list = None
+    if links:
+        try:
+            links_list = json.loads(links)
+            if not isinstance(links_list, list):
+                raise ValueError("Links must be a list")
+            links_list = [AnnouncementLinkCreate(**item) for item in links_list]
+        except (json.JSONDecodeError, ValueError) as e:
+            raise HTTPException(status_code=422, detail=f"Invalid links format: {str(e)}")
+    
+    return announcements.create_announcement(db, announcement, links_list, file)
 
 @Routes.put(
-    "/announcements/{ann_id}",
-    tags=["announcements"],
-    dependencies=[Depends(JWT_Bearer())],
+    "/announcements/{announcement_id}",
+    tags=["announcements"]
 )
 async def update_announcement(
-    ann_id: int, ann: Announcement, db: Session = Depends(con_db)
+    announcement_id: int,
+    announcement: AnnouncementCreate = Depends(parse_announcement_form),
+    links: Optional[str] = Form(None), 
+    file: Optional[UploadFile] = File(None),
+    db: Session = Depends(con_db),
 ):
-    return announcement.update_announcement(db, ann_id, ann)
+    links_list = None
+    if links:
+        try:
+            links_list = json.loads(links)
+            if not isinstance(links_list, list):
+                raise ValueError("Links must be a list")
+            links_list = [AnnouncementLinkCreate(**item) for item in links_list]
+        except (json.JSONDecodeError, ValueError) as e:
+            raise HTTPException(status_code=422, detail=f"Invalid links format: {str(e)}")
+    
+    return announcements.update_announcement(db,announcement_id, announcement, links_list, file)
+
 
 @Routes.delete(
     "/announcements/{ann_id}",
-    tags=["announcements"],
-    dependencies=[Depends(JWT_Bearer())],
+    tags=["announcements"]
 )
 async def delete_announcement(ann_id: int, db: Session = Depends(con_db)):
-    return announcement.delete_announcement(db, ann_id)
+    return announcements.delete_announcement(db, ann_id)
 
 """ 
 FAQS Routes
 """
 
-@Routes.get("/faqs", tags=["faqs"])
+@Routes.get("/faqs/", tags=["faqs"])
 async def get_faqs(db: Session = Depends(con_db)):
     return faqs.get_all_faqs(db)
 

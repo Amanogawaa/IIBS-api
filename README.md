@@ -51,5 +51,3 @@ python -m venv venv
 Once you've installed and started the API, you can view the available routes in the documentation:
 
 [API Documentation](http://127.0.0.1:8000/docs)
-
-// todo transition to pipfile not pip

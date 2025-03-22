@@ -44,15 +44,27 @@ class Announcement(Base):
     )
     is_urgent = Column(Boolean, default=False)
     platform = Column(String(255), nullable=False, default='web')
-    links = Column(String(255), nullable=True)
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
         DateTime,
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
     )
-
+    
+    links = relationship("AnnouncementLink", back_populates="announcement", cascade="all, delete-orphan")
     user = relationship("User", back_populates="announcements")
+
+class AnnouncementLink(Base):
+    __tablename__ = "announcement_links"
+
+    id = Column(Integer, primary_key=True, index=True)
+    announcement_id = Column(
+        Integer, ForeignKey("announcements.id", ondelete="CASCADE"), nullable=False
+    )
+    url = Column(String(255), nullable=False)  
+    title = Column(String(255), nullable=True) 
+
+    announcement = relationship("Announcement", back_populates="links")
 
 class Faq(Base):
     __tablename__ = "faqs"
