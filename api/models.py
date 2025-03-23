@@ -151,6 +151,7 @@ class ServiceAttribute(Base):
 
     service = relationship("Service", back_populates="attributes")
 
+
 class Location(Base):
     __tablename__ = "locations"
 

@@ -1,3 +1,4 @@
+import json
 from sqlalchemy.orm import Session, joinedload
 from api import models
 from typing import Optional
@@ -7,7 +8,7 @@ from fastapi import HTTPException
 from api.schema.response import ResponseModel
 from api.schema.service import *
 
-def createService(db: Session, service_data: ServiceCreate)-> ResponseModel:
+def createService(db: Session, service_data: ServiceCreate, attr_data: Optional[list[AttributeCreate]])-> ResponseModel:
     if db.query(models.Service).filter(models.Service.name == service_data.name).first():
         raise HTTPException(status_code=400, detail="Service already exists")
     
@@ -25,6 +26,28 @@ def createService(db: Session, service_data: ServiceCreate)-> ResponseModel:
     db.commit()
     db.refresh(service)
 
+    attributes_list = [] 
+    if attr_data is not None:
+        for attr in attr_data:
+            if attr.attribute_type == 'list':
+                attr_value = json.dumps(attr.attribute_value)
+            else:
+                attr_value = attr.attribute_value
+            
+            attr_response = models.ServiceAttribute(
+                service_id=service.id,
+                attribute_name=attr.attribute_name,
+                attribute_value=attr_value,
+                attribute_type=attr.attribute_type
+            )
+            db.add(attr_response)
+            attributes_list.append(AttributeCreate(
+                attribute_name=attr.attribute_name,
+                attribute_value=attr.attribute_value,
+                attribute_type=attr.attribute_type
+            ))
+        db.commit()
+
     return ResponseModel(
         message="Service Created Successfully",
         data=ServiceResponse(
@@ -36,6 +59,7 @@ def createService(db: Session, service_data: ServiceCreate)-> ResponseModel:
             image_path=service_data.image_path,
             user_id=service_data.user_id,
             category_id=service_data.category_id,
+            attributes=attributes_list,
             created_at=service.created_at,
             updated_at=service.updated_at,
         ),

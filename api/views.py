@@ -94,7 +94,7 @@ async def get_services(service_id: Optional[int | None] = None, db: Session = De
 
 @Routes.post('/services/', tags=['services'])
 async def create_service(service_data: ServiceCreate, db: Session = Depends(con_db)):
-    return service.createService(db, service_data)
+    return service.createService(db, service_data, service_data.attributes)
 
 @Routes.put('/services/{service_id}',  tags=['services'])
 async def update_service(service_id: int, service_data: ServiceCreate,db: Session = Depends(con_db) ):
