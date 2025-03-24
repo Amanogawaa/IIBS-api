@@ -7,29 +7,6 @@ from fastapi import HTTPException
 from api.schema.response import ResponseModel
 from api.schema.category import *
 
-def createCategory(db: Session, cat_data: CreateCategory) -> ResponseModel: 
-    if db.query(models.Category).filter(models.Category.name == cat_data.name).first():
-        raise HTTPException(status_code=400, detail="Category already exists")
-    
-    category = models.Category(name=cat_data.name, description=cat_data.description, status=cat_data.status)
-
-    db.add(category)
-    db.commit()
-    db.refresh(category)
-
-    return ResponseModel(
-        message="Category Created Successfully",
-        data=CategoryResponse(
-            id=category.id,
-            name=category.name,
-            description=category.description,
-            status=category.status,
-            created_at=category.created_at,
-            updated_at=category.updated_at,
-        ),
-        status_code=201,
-    )
-
 def getCategories(db: Session, category_id: Optional[int | None]= None):
     query = db.query(models.Category)
 
@@ -51,6 +28,20 @@ def getCategories(db: Session, category_id: Optional[int | None]= None):
         status_code=200,
     )
 
+def createCategory(db: Session, cat_data: CreateCategory) -> ResponseModel: 
+    if db.query(models.Category).filter(models.Category.name == cat_data.name).first():
+        raise HTTPException(status_code=400, detail="Category already exists")
+    
+    category = models.Category(name=cat_data.name, description=cat_data.description, status=cat_data.status)
+
+    db.add(category)
+    db.commit()
+    db.refresh(category)
+
+    return ResponseModel(
+        message="Category Created Successfully",
+        status_code=201,
+    )
 
 def updateCategory(db: Session, cat_id: int, cat_data: CreateCategory) -> ResponseModel:
     query = db.query(models.Category).filter(models.Category.id == cat_id).first()
@@ -67,7 +58,6 @@ def updateCategory(db: Session, cat_id: int, cat_data: CreateCategory) -> Respon
 
     return ResponseModel(
         message="Category Updated Successfully",
-        data=CategoryResponse.model_validate(query, from_attributes=True),
         status_code=200,
     )
 

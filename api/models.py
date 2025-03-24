@@ -54,6 +54,7 @@ class Announcement(Base):
     links = relationship("AnnouncementLink", back_populates="announcement", cascade="all, delete-orphan")
     user = relationship("User", back_populates="announcements")
 
+
 class AnnouncementLink(Base):
     __tablename__ = "announcement_links"
 
@@ -151,25 +152,6 @@ class ServiceAttribute(Base):
 
     service = relationship("Service", back_populates="attributes")
 
-
-class Location(Base):
-    __tablename__ = "locations"
-
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(255), nullable=False, unique=True)
-    description = Column(Text, nullable=False)
-    status = Column(String(255), nullable=False, default="active")
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(
-        DateTime,
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
-    )
-
-    services = relationship(
-        "Service", secondary=service_location, back_populates="locations"
-    )
-
 class BusinessInfo(Base):
     __tablename__ = "business_info"
 
@@ -200,6 +182,25 @@ class BusinessInfoAttribute(Base):
     attribute_type = Column(String(255), nullable=False)
 
     business_info = relationship("BusinessInfo", back_populates="attributes")
+
+# not yet implemented
+class Location(Base):
+    __tablename__ = "locations"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(255), nullable=False, unique=True)
+    description = Column(Text, nullable=False)
+    status = Column(String(255), nullable=False, default="active")
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at = Column(
+        DateTime,
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
+
+    services = relationship(
+        "Service", secondary=service_location, back_populates="locations"
+    )
 
 class Download(Base):
     __tablename__ = "downloads"

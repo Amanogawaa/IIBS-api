@@ -7,7 +7,6 @@ from typing import Union, Optional
 from api.schema.faqs import *
 from api.schema.response import ResponseModel
 
-
 def get_all_faqs(db: Session, faqs_id: Optional[int | None] = None):
     query = db.query(models.Faq)
 
@@ -25,7 +24,6 @@ def get_all_faqs(db: Session, faqs_id: Optional[int | None] = None):
         message="Requirements fetched successfully", data=reqs_response, status_code=200
     )
 
-
 def create_faq(db: Session, data: FaqCreate):
     query = db.query(models.Faq).filter(models.Faq.question == data.question).first()
 
@@ -42,10 +40,8 @@ def create_faq(db: Session, data: FaqCreate):
 
     return ResponseModel(
         message="FAQ Created Successfully",
-        data=Faq.model_validate(faq, from_attributes=True),
         status_code=200,
     )
-
 
 def update_faq(db: Session, faq_id: int, data: FaqCreate):
     query = db.query(models.Faq).filter(models.Faq.id == faq_id).first()
@@ -62,10 +58,8 @@ def update_faq(db: Session, faq_id: int, data: FaqCreate):
 
     return ResponseModel(
         message="FAQ Updated Successfully",
-        data=Faq.model_validate(query, from_attributes=True),
         status_code=200,
     )
-
 
 def delete_faq(db: Session, faq_id: int):
     query = db.query(models.Faq).filter(models.Faq.id == faq_id).first()

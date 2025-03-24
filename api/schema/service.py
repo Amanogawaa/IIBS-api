@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union
 from pydantic import BaseModel, ConfigDict
 
 class ServiceBase(BaseModel):
@@ -14,7 +14,7 @@ class ServiceBase(BaseModel):
     
 class AttributeCreate(BaseModel):
     attribute_name: str
-    attribute_value: list | str
+    attribute_value: Union[list, str]
     attribute_type: str
 
     model_config = ConfigDict(from_attributes=True)

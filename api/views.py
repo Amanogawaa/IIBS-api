@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy.orm import Session
 
 # utils
+from api.file_handling import file_handling
 from api.utils import JWT_Bearer
 from api.form_parser import parse_announcement_form
 
@@ -25,7 +26,6 @@ import api.crud.faqs as faqs
 import api.crud.business_info as infos
 
 Routes = APIRouter()
-
 
 def con_db():
     db = SessionLocal()
@@ -97,8 +97,8 @@ async def create_service(service_data: ServiceCreate, db: Session = Depends(con_
     return service.createService(db, service_data, service_data.attributes)
 
 @Routes.put('/services/{service_id}',  tags=['services'])
-async def update_service(service_id: int, service_data: ServiceCreate,db: Session = Depends(con_db) ):
-    return service.update_service(db, service_id, service_data)
+async def update_service(service_id: int, service_data: ServiceCreate, db: Session = Depends(con_db) ):
+    return service.update_service(db, service_id, service_data, service_data.attributes)
 
 @Routes.delete('/services/{service_id}', tags=['services'])
 async def delete_category(service_id: int, db: Session = Depends(con_db)):
@@ -204,7 +204,7 @@ async def get_infos(info_id: int, db: Session = Depends(con_db)):
 
 @Routes.post('/information/', tags=['information'])
 async def creat_information(info_data: BusinessInfoCreate, db: Session = Depends(con_db)):
-    return infos.createInfo(db, info_data)
+    return infos.createInfo(db, info_data, info_data.attributes)
 
 @Routes.put("/information/{info_id}", tags=["information"],)
 async def update_info(info_id: int, info_data: BusinessInfoCreate, db: Session = Depends(con_db)):
@@ -213,3 +213,7 @@ async def update_info(info_id: int, info_data: BusinessInfoCreate, db: Session =
 @Routes.delete("/information/{info_id}", tags=["information"])
 async def delete_info(info_id: int, db: Session = Depends(con_db)):
     return infos.delete_information(db, info_id)
+
+@Routes.post("/upload/file/")
+async def upload_file(file: List[UploadFile] = File(...)):
+    return file_handling('service', file)

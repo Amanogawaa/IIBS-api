@@ -13,6 +13,28 @@ from api.schema.response import ResponseModel
 UPLOAD_DIR = "uploads/"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
+def get_announcements(db: Session, announcement_id: Optional[int | None] = None):
+
+    query = db.query(models.Announcement)
+
+    if announcement_id:
+        query = query.filter(models.Announcement.id == announcement_id)
+
+    announcements = query.all()        
+
+    if not announcements:
+        raise HTTPException(status_code=404, detail="Announcements not found")
+
+    announcement_response = [
+        AnnouncementResponse.model_validate(announcement)
+        for announcement in announcements
+    ]
+
+    return ResponseModel(
+        message="Announcements Found" if announcement_id else "All Announcements",
+        data=announcement_response,
+        status_code=200,
+    )
 
 def create_announcement(
     db: Session,
@@ -60,46 +82,9 @@ def create_announcement(
         for link in db_announcement.links 
     ] if db_announcement.links else None
 
-    response_data = AnnouncementResponse(
-        id=db_announcement.id,
-        name=db_announcement.name,
-        description=db_announcement.description,
-        image=db_announcement.image,
-        is_urgent=db_announcement.is_urgent,
-        platform=db_announcement.platform,
-        links=response_links,
-        user_id=db_announcement.user_id,
-        created_at=db_announcement.created_at,
-        updated_at=db_announcement.updated_at,
-    )
-
     return ResponseModel(
         message="Announcement Created Successfully",
-        data=response_data,
         status_code=201,
-    )
-
-def get_announcements(db: Session, announcement_id: Optional[int | None] = None):
-
-    query = db.query(models.Announcement)
-
-    if announcement_id:
-        query = query.filter(models.Announcement.id == announcement_id)
-
-    announcements = query.all()
-
-    if not announcements:
-        raise HTTPException(status_code=404, detail="Announcements not found")
-
-    announcement_response = [
-        AnnouncementResponse.model_validate(announcement)
-        for announcement in announcements
-    ]
-
-    return ResponseModel(
-        message="Announcements Found" if announcement_id else "All Announcements",
-        data=announcement_response,
-        status_code=200,
     )
 
 def update_announcement(
@@ -149,27 +134,8 @@ def update_announcement(
     db.commit()
     db.refresh(db_announcement)
 
-    response_links = [
-        AnnouncementLinkResponse(id=link.id, url=link.url, title=link.title)
-        for link in db_announcement.links
-    ] if db_announcement.links else None
-
-    response_data = AnnouncementResponse(
-        id=db_announcement.id,
-        name=db_announcement.name,
-        description=db_announcement.description,
-        image=db_announcement.image,
-        is_urgent=db_announcement.is_urgent,
-        platform=db_announcement.platform,
-        links=response_links,
-        user_id=db_announcement.user_id,
-        created_at=db_announcement.created_at,
-        updated_at=db_announcement.updated_at,
-    )
-
     return ResponseModel(
         message="Announcement Updated Successfully",
-        data=response_data,
         status_code=200,
     )
 

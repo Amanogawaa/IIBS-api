@@ -26,9 +26,6 @@ def register_user(db: Session, user: UserCreate):
 
     return ResponseModel(
         message="User Created Successfully",
-        data=UserResponse(
-            id=db_user.id, username=db_user.username, email=db_user.email
-        ),
         status_code=200,
     )
 
