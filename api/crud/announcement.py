@@ -60,7 +60,6 @@ def create_announcement(
         with open(temp_path, "wb") as buffer:
             file.file.seek(0)
             shutil.copyfileobj(file.file, buffer)
-        print(f"Temporary file saved: {os.path.exists(temp_path)}")
         
         try:
             img = Image.open(temp_path)
@@ -70,10 +69,8 @@ def create_announcement(
 
             max_size = (800, 800)
             img.thumbnail(max_size, Image.Resampling.LANCZOS)
-            print(f"Saving processed image to: {image_path}")
 
             img.save(image_path, quality=85, optimize=True)
-            print(f"Image saved: {os.path.exists(image_path)}")
             os.remove(temp_path) 
 
         except Exception as e:
@@ -119,7 +116,7 @@ def update_announcement(
     if not db_announcement:
         raise HTTPException(status_code=404, detail="Announcement not found")
 
-    image_path = db_announcement.image_path
+    updated_path = db_announcement.image_path
     if file:
         allowed_extensions = {"jpg", "jpeg", "png", "gif"}
         file_ext = file.filename.split(".")[-1].lower()
@@ -149,19 +146,27 @@ def update_announcement(
             print(f"Image saved: {os.path.exists(image_path)}")
             os.remove(temp_path) 
 
+            updated_path = image_path
+
         except Exception as e:
             os.remove(temp_path)
             raise HTTPException(status_code=400, detail=f"Invalid image file: {str(e)}")
         finally:
             file.file.close()
 
-
-    db_announcement.name = announcement_data.name
-    db_announcement.description = announcement_data.description
-    db_announcement.image_path = image_path
-    db_announcement.is_urgent = announcement_data.is_urgent
-    db_announcement.platform = announcement_data.platform
-    db_announcement.user_id = announcement_data.user_id
+    if announcement_data.name is not None:
+        db_announcement.name = announcement_data.name
+    if announcement_data.description is not None:
+        db_announcement.description = announcement_data.description
+    if announcement_data.is_urgent is not None:
+        db_announcement.is_urgent = announcement_data.is_urgent
+    if announcement_data.platform is not None:
+        db_announcement.platform = announcement_data.platform
+    if announcement_data.user_id is not None:
+        db_announcement.user_id = announcement_data.user_id
+    if updated_path:
+        db_announcement.image_path = updated_path    
+    
 
     if links is not None:  
         db.query(models.AnnouncementLink).filter(models.AnnouncementLink.announcement_id == announcement_id).delete()

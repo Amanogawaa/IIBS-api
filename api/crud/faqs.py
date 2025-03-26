@@ -49,9 +49,12 @@ def update_faq(db: Session, faq_id: int, data: FaqCreate):
     if not query:
         raise HTTPException(status_code=404, detail="FAQ not found")
 
-    query.question = data.question
-    query.answer = data.answer
-    query.service_id = data.service_id
+    if data.question is not None:
+        query.question = data.question
+    if data.answer is not None:        
+        query.answer = data.answer
+    if data.service_id is not None:        
+        query.service_id = data.service_id
 
     db.commit()
     db.refresh(query)

@@ -3,12 +3,12 @@ from sqlalchemy.orm import relationship
 from api.database import Base
 from datetime import datetime, timezone
 
-service_location = Table(
-    "service_location",
-    Base.metadata,
-    Column("service_id", Integer, ForeignKey("services.id", ondelete="CASCADE"), primary_key=True),
-    Column("location_id", Integer, ForeignKey("locations.id", ondelete="CASCADE"), primary_key=True)
-)
+# service_location = Table(
+#     "service_location",
+#     Base.metadata,
+#     Column("service_id", Integer, ForeignKey("services.id", ondelete="CASCADE"), primary_key=True),
+#     Column("location_id", Integer, ForeignKey("locations.id", ondelete="CASCADE"), primary_key=True)
+# )
 
 class User(Base):
     __tablename__ = "users"
@@ -133,10 +133,10 @@ class Service(Base):
     attributes = relationship(
         "ServiceAttribute", back_populates="service", cascade="all, delete"
     )
-    locations = relationship(
-        "Location", secondary=service_location, back_populates="services"
-    )
-    download = relationship("Download", back_populates="services", cascade="all, delete")
+    # locations = relationship(
+    #     "Location", secondary=service_location, back_populates="services"
+    # )
+    # download = relationship("Download", back_populates="services", cascade="all, delete")
     
 class ServiceAttribute(Base):
     __tablename__ = "service_attributes"
@@ -182,41 +182,41 @@ class BusinessInfoAttribute(Base):
 
     business_info = relationship("BusinessInfo", back_populates="attributes")
 
-# not yet implemented
-class Location(Base):
-    __tablename__ = "locations"
+# not yet implemented dunno if needed
+# class Location(Base):
+#     __tablename__ = "locations"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(255), nullable=False, unique=True)
-    description = Column(Text, nullable=False)
-    status = Column(String(255), nullable=False, default="active")
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(
-        DateTime,
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
-    )
+#     id = Column(Integer, primary_key=True, index=True)
+#     name = Column(String(255), nullable=False, unique=True)
+#     description = Column(Text, nullable=False)
+#     status = Column(String(255), nullable=False, default="active")
+#     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+#     updated_at = Column(
+#         DateTime,
+#         default=lambda: datetime.now(timezone.utc),
+#         onupdate=lambda: datetime.now(timezone.utc),
+#     )
 
-    services = relationship(
-        "Service", secondary=service_location, back_populates="locations"
-    )
+#     services = relationship(
+#         "Service", secondary=service_location, back_populates="locations"
+#     )
 
-class Download(Base):
-    __tablename__ = "downloads"
+# class Download(Base):
+#     __tablename__ = "downloads"
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String(255), nullable=False, unique=True)
-    file = Column(String(255), nullable=False, unique=True)
-    description = Column(Text, nullable=False)
-    category = Column(String(255), nullable=False)
-    service_id = Column(Integer,  ForeignKey("services.id", ondelete="CASCADE"), nullable=False)
-    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-    updated_at = Column(
-        DateTime,
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
-    )
+#     id = Column(Integer, primary_key=True, index=True)
+#     name = Column(String(255), nullable=False, unique=True)
+#     file = Column(String(255), nullable=False, unique=True)
+#     description = Column(Text, nullable=False)
+#     category = Column(String(255), nullable=False)
+#     service_id = Column(Integer,  ForeignKey("services.id", ondelete="CASCADE"), nullable=False)
+#     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+#     updated_at = Column(
+#         DateTime,
+#         default=lambda: datetime.now(timezone.utc),
+#         onupdate=lambda: datetime.now(timezone.utc),
+#     )
 
-    services = relationship(
-        "Service", back_populates="download", cascade="all, delete"
-    )
+#     services = relationship(
+#         "Service", back_populates="download", cascade="all, delete"
+#     )

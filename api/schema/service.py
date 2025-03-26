@@ -6,9 +6,8 @@ class ServiceBase(BaseModel):
     name: str
     description: str
     status: str = 'Active'
-    image_path: str
-    user_id: int = 1
-    category_id: int = 1
+    user_id: int
+    category_id: int 
    
     
 class AttributeCreate(BaseModel):
@@ -20,6 +19,7 @@ class AttributeCreate(BaseModel):
 
 class ServiceResponse(ServiceBase):
     id: int
+    image_path: str
     attributes: list[AttributeCreate]
     created_at: datetime
     updated_at: datetime

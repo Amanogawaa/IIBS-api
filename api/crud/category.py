@@ -49,9 +49,12 @@ def updateCategory(db: Session, cat_id: int, cat_data: CreateCategory) -> Respon
     if not query:
         raise HTTPException(status_code=404, detail="Category not found")
     
-    query.name = cat_data.name
-    query.description = cat_data.description
-    query.status = cat_data.status
+    if cat_data.name is not None:
+        query.name = cat_data.name
+    if cat_data.description is not None:
+        query.description = cat_data.description
+    if cat_data.status is not None:
+        query.status = cat_data.status
 
     db.commit()
     db.refresh(query)

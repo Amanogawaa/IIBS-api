@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 # utils
 from api.file_handling import file_handling
 from api.utils import JWT_Bearer
-from api.form_parser import parse_announcement_form
+from api.form_parser import parse_announcement_form, service_form
 
 # schemas
 from api.database import SessionLocal
@@ -39,11 +39,11 @@ def con_db():
 Auth Routes
 """
 
-@Routes.get("/auth/", tags=["auth"])
+@Routes.get("/auth/", tags=["auth"], dependencies=[Depends(JWT_Bearer())])
 async def get_users(db: Session = Depends(con_db)):
     return user.get_all_users(db)
 
-@Routes.get("/auth/{user_id}/", tags=["auth"])
+@Routes.get("/auth/{user_id}/", tags=["auth"],dependencies=[Depends(JWT_Bearer())])
 async def get_user(db: Session = Depends(con_db), user_id: int | None = None):
     return user.get_all_users(db, user_id)
 
@@ -68,15 +68,15 @@ async def get_category(db: Session = Depends(con_db)):
 async def get_category(cat_id: Optional[int | None] = None, db: Session = Depends(con_db)):
     return category.getCategories(db, cat_id)
 
-@Routes.post('/category/', tags=['category'])
+@Routes.post('/category/', tags=['category'], dependencies=[Depends(JWT_Bearer())])
 async def create_category( cat_data: CreateCategory, db: Session = Depends(con_db)):
     return category.createCategory(db, cat_data)
 
-@Routes.put('/category/{cat_id}', tags=['category'])
+@Routes.put('/category/{cat_id}', tags=['category'], dependencies=[Depends(JWT_Bearer())])
 async def update_category(cat_id: int, cat_data: CreateCategory, db: Session = Depends(con_db)):
     return category.updateCategory(db, cat_id, cat_data)
 
-@Routes.delete('/category/{cat_id}', tags=['category'])
+@Routes.delete('/category/{cat_id}', tags=['category'], dependencies=[Depends(JWT_Bearer())])
 async def delete_category(cat_id: int, db: Session = Depends(con_db)):
     return category.deleteCategory(db, cat_id)
 
@@ -92,15 +92,15 @@ async def get_services(db: Session = Depends(con_db)):
 async def get_services(service_id: Optional[int | None] = None, db: Session = Depends(con_db)):
     return service.get_service(db, service_id)
 
-@Routes.post('/services/', tags=['services'])
-async def create_service(service_data: ServiceCreate, db: Session = Depends(con_db)):
-    return service.createService(db, service_data, service_data.attributes)
+@Routes.post('/services/', tags=['services'], dependencies=[Depends(JWT_Bearer())])
+async def create_service(service_data: ServiceCreate = Depends(service_form), file: Optional[UploadFile] = File(None), db: Session = Depends(con_db)):
+    return service.createService(db, service_data, service_data.attributes, file)
 
-@Routes.put('/services/{service_id}',  tags=['services'])
-async def update_service(service_id: int, service_data: ServiceCreate, db: Session = Depends(con_db) ):
-    return service.update_service(db, service_id, service_data, service_data.attributes)
+@Routes.put('/services/{service_id}',  tags=['services'], dependencies=[Depends(JWT_Bearer())])
+async def update_service(service_id: int, service_data: ServiceCreate = Depends(service_form),file: Optional[UploadFile] = File(None),  db: Session = Depends(con_db)):
+    return service.update_service(db, service_id, service_data, service_data.attributes, file)
 
-@Routes.delete('/services/{service_id}', tags=['services'])
+@Routes.delete('/services/{service_id}', tags=['services'], dependencies=[Depends(JWT_Bearer())])
 async def delete_category(service_id: int, db: Session = Depends(con_db)):
     return service.delete_service(db, service_id)
 
@@ -116,7 +116,7 @@ async def get_faqs(db: Session = Depends(con_db)):
 async def get_faq(announcement_id: int, db: Session = Depends(con_db)):
     return announcements.get_announcements(db, announcement_id)
 
-@Routes.post("/announcements/", tags=["announcements"])
+@Routes.post("/announcements/", tags=["announcements"], dependencies=[Depends(JWT_Bearer())])
 async def create_announcement(
     announcement: AnnouncementCreate = Depends(parse_announcement_form),
     links: Optional[str] = Form(None), 
@@ -137,7 +137,7 @@ async def create_announcement(
 
 @Routes.put(
     "/announcements/{announcement_id}",
-    tags=["announcements"]
+    tags=["announcements"], dependencies=[Depends(JWT_Bearer())]
 )
 async def update_announcement(
     announcement_id: int,
@@ -161,7 +161,7 @@ async def update_announcement(
 
 @Routes.delete(
     "/announcements/{ann_id}",
-    tags=["announcements"]
+    tags=["announcements"], dependencies=[Depends(JWT_Bearer())]
 )
 async def delete_announcement(ann_id: int, db: Session = Depends(con_db)):
     return announcements.delete_announcement(db, ann_id)
@@ -202,18 +202,14 @@ async def get_infos(db: Session = Depends(con_db)):
 async def get_infos(info_id: int, db: Session = Depends(con_db)):
     return infos.get_information(db, info_id)
 
-@Routes.post('/information/', tags=['information'])
+@Routes.post('/information/', tags=['information'], dependencies=[Depends(JWT_Bearer())])
 async def creat_information(info_data: BusinessInfoCreate, db: Session = Depends(con_db)):
     return infos.createInfo(db, info_data, info_data.attributes)
 
-@Routes.put("/information/{info_id}", tags=["information"],)
+@Routes.put("/information/{info_id}", tags=["information"], dependencies=[Depends(JWT_Bearer())])
 async def update_info(info_id: int, info_data: BusinessInfoCreate, db: Session = Depends(con_db)):
     return infos.update_information(db, info_id, info_data)
 
-@Routes.delete("/information/{info_id}", tags=["information"])
+@Routes.delete("/information/{info_id}", tags=["information"], dependencies=[Depends(JWT_Bearer())])
 async def delete_info(info_id: int, db: Session = Depends(con_db)):
     return infos.delete_information(db, info_id)
-
-@Routes.post("/upload/file/")
-async def upload_file(file: List[UploadFile] = File(...)):
-    return file_handling('service', file)
