@@ -1,7 +1,6 @@
 from fastapi import Form
 from api.schema.announcement import *
 
-
 async def parse_announcement_form(
    name: str = Form(...),
     description: str = Form(...),

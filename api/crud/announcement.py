@@ -9,8 +9,9 @@ from datetime import datetime
 
 from api.schema.announcement import *
 from api.schema.response import ResponseModel
+from PIL import Image
 
-UPLOAD_DIR = "uploads/"
+UPLOAD_DIR = "uploads/announcements/"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 def get_announcements(db: Session, announcement_id: Optional[int | None] = None):
@@ -50,17 +51,42 @@ def create_announcement(
         allowed_extensions = {"jpg", "jpeg", "png", "gif"}
         file_ext = file.filename.split(".")[-1].lower()
         if file_ext not in allowed_extensions:
-            raise HTTPException(status_code=400, detail="Invalid file type")
+            raise HTTPException(status_code=400, detail="Invalid image_file type")
+        
         unique_filename = f"{uuid4().hex}.{file_ext}"
         image_path = os.path.join(UPLOAD_DIR, unique_filename)
-        with open(image_path, "wb") as buffer:
+
+        temp_path = image_path + ".temp"
+        with open(temp_path, "wb") as buffer:
+            file.file.seek(0)
             shutil.copyfileobj(file.file, buffer)
+        print(f"Temporary file saved: {os.path.exists(temp_path)}")
+        
+        try:
+            img = Image.open(temp_path)
+            img.verify()
+
+            img = Image.open(temp_path)
+
+            max_size = (800, 800)
+            img.thumbnail(max_size, Image.Resampling.LANCZOS)
+            print(f"Saving processed image to: {image_path}")
+
+            img.save(image_path, quality=85, optimize=True)
+            print(f"Image saved: {os.path.exists(image_path)}")
+            os.remove(temp_path) 
+
+        except Exception as e:
+            os.remove(temp_path)
+            raise HTTPException(status_code=400, detail=f"Invalid image file: {str(e)}")
+        finally:
+            file.file.close()
 
     db_announcement = models.Announcement(
         name=announcement_data.name,
         description=announcement_data.description,
-        image=image_path,
-        is_urgent=announcement_data.is_urgent,
+        image_path=image_path,
+        is_urgent=announcement_data.is_urgent, 
         platform=announcement_data.platform,
         user_id=announcement_data.user_id,
     )
@@ -76,11 +102,6 @@ def create_announcement(
     db.add(db_announcement)
     db.commit()
     db.refresh(db_announcement)
-
-    response_links = [
-        AnnouncementLinkResponse(id=link.id, url=link.url, title=link.title)
-        for link in db_announcement.links 
-    ] if db_announcement.links else None
 
     return ResponseModel(
         message="Announcement Created Successfully",
@@ -98,22 +119,46 @@ def update_announcement(
     if not db_announcement:
         raise HTTPException(status_code=404, detail="Announcement not found")
 
-    image_path = db_announcement.image
+    image_path = db_announcement.image_path
     if file:
         allowed_extensions = {"jpg", "jpeg", "png", "gif"}
         file_ext = file.filename.split(".")[-1].lower()
         if file_ext not in allowed_extensions:
-            raise HTTPException(status_code=400, detail="Invalid file type")
+            raise HTTPException(status_code=400, detail="Invalid image_file type")
+        
         unique_filename = f"{uuid4().hex}.{file_ext}"
         image_path = os.path.join(UPLOAD_DIR, unique_filename)
-        with open(image_path, "wb") as buffer:
+
+        temp_path = image_path + ".temp"
+        with open(temp_path, "wb") as buffer:
+            file.file.seek(0)
             shutil.copyfileobj(file.file, buffer)
-        if db_announcement.image and os.path.exists(db_announcement.image):
-            os.remove(db_announcement.image)
+        print(f"Temporary file saved: {os.path.exists(temp_path)}")
+        
+        try:
+            img = Image.open(temp_path)
+            img.verify()
+
+            img = Image.open(temp_path)
+
+            max_size = (800, 800)
+            img.thumbnail(max_size, Image.Resampling.LANCZOS)
+            print(f"Saving processed image to: {image_path}")
+
+            img.save(image_path, quality=85, optimize=True)
+            print(f"Image saved: {os.path.exists(image_path)}")
+            os.remove(temp_path) 
+
+        except Exception as e:
+            os.remove(temp_path)
+            raise HTTPException(status_code=400, detail=f"Invalid image file: {str(e)}")
+        finally:
+            file.file.close()
+
 
     db_announcement.name = announcement_data.name
     db_announcement.description = announcement_data.description
-    db_announcement.image = image_path
+    db_announcement.image_path = image_path
     db_announcement.is_urgent = announcement_data.is_urgent
     db_announcement.platform = announcement_data.platform
     db_announcement.user_id = announcement_data.user_id

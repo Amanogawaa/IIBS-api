@@ -6,7 +6,6 @@ class ServiceBase(BaseModel):
     name: str
     description: str
     status: str = 'Active'
-    file_path: str
     image_path: str
     user_id: int = 1
     category_id: int = 1

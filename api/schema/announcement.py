@@ -9,7 +9,7 @@ class AnnouncementLinkCreate(BaseModel):
 class AnnouncementBase(BaseModel):
     name: str
     description: str
-    image: Optional[str] = None
+    image_path: Optional[str] = None
     is_urgent: bool
     platform: str
     user_id: int
