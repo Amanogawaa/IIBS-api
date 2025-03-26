@@ -14,6 +14,12 @@ JWT_REFRESH_KEY=
 
 - Database name should be iibs
 
+- If the database name is not iibs, you need to configure the `alembic.ini` file. Find this line of code and change it, you can copy the `DATABASE_URL` from your `env` file and paste it.
+
+```
+sqlalchemy.url = postgresql://miria:hades2801@localhost:5432/iibs_db
+```
+
 You can generate a random hex key using the following command:
 
 ```bash
@@ -45,6 +51,11 @@ python -m venv venv
    ```
 
 - Note: Ensure you have `pip` installed on your system before running the installation command.
+
+4. Run the project:
+   ```bash
+    uvicorn main:app --reload
+   ```
 
 ## Documentation
 
