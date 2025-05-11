@@ -15,7 +15,7 @@ from api.schema.service import *
 UPLOAD_DIR = "uploads/service/"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-def get_service(db: Session, service_id: Optional[int | None] = None)-> ResponseModel:
+def get_service(db: Session, service_id: Optional[int | None] = None):
     query = db.query(models.Service)
 
     if service_id:
@@ -38,6 +38,8 @@ def createService(db: Session, service_data: ServiceCreate, attr_data: Optional[
     if db.query(models.Service).filter(models.Service.name == service_data.name).first():
         raise HTTPException(status_code=400, detail="Service already exists")
     
+    print(service_data)
+
     image_path = None
     if file:
         allowed_extensions = {"jpg", "jpeg", "png", "gif"}
@@ -70,7 +72,6 @@ def createService(db: Session, service_data: ServiceCreate, attr_data: Optional[
             raise HTTPException(status_code=400, detail=f"Invalid image file: {str(e)}")
         finally:
             file.file.close()
-
 
     service = models.Service(
         name=service_data.name,
