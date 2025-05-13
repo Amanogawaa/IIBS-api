@@ -1,5 +1,6 @@
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from api.database import engine
 import api.models as models
 from api.views import Routes
@@ -7,9 +8,10 @@ from api.views import Routes
 def create_app() -> FastAPI:
     app = FastAPI()
 
+    app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+    
     origins = [
-        "http://localhost",
-        "http://localhost:5173",
+    "http://localhost:5173",
     ]
 
     app.add_middleware(

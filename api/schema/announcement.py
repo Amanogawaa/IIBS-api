@@ -10,7 +10,6 @@ class AnnouncementBase(BaseModel):
     name: str
     description: str
     image_path: Optional[str] = None
-    is_urgent: bool
     platform: str
     user_id: int
 

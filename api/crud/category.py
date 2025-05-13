@@ -16,7 +16,7 @@ def getCategories(db: Session, category_id: Optional[int | None]= None):
     categories = query.all()
 
     if not categories:
-        return []
+        raise HTTPException(status_code=404, detail="No Category found")
     
     category_response = [CategoryResponse.model_validate(
         cat, from_attributes=True

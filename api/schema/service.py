@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Optional, Union
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, computed_field
 
 class ServiceBase(BaseModel):
     name: str
@@ -23,6 +23,14 @@ class ServiceResponse(ServiceBase):
     attributes: list[AttributeCreate]
     created_at: datetime
     updated_at: datetime
+
+    @computed_field
+    @property
+    def image_url(self) -> Optional[str]:
+        if self.image_path:
+            base_url = "http://127.0.0.1:8000"  # Update for production
+            return f"{base_url}/{self.image_path}"
+        return None
 
     model_config = ConfigDict(from_attributes=True) 
 

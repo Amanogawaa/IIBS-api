@@ -1,5 +1,6 @@
 import json
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
 # utils

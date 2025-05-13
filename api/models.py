@@ -42,8 +42,7 @@ class Announcement(Base):
     user_id = Column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    is_urgent = Column(Boolean, default=False)
-    platform = Column(String(255), nullable=False, default='web')
+    platform = Column(String(255), nullable=False, default='physical')
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
         DateTime,
