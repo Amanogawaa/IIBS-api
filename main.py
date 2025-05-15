@@ -22,6 +22,7 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+
     app.include_router(Routes, prefix="/api")
 
     models.Base.metadata.create_all(bind=engine)

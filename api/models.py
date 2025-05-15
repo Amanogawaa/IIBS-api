@@ -10,6 +10,41 @@ from datetime import datetime, timezone
 #     Column("location_id", Integer, ForeignKey("locations.id", ondelete="CASCADE"), primary_key=True)
 # )
 
+class Feedback(Base):
+    __tablename__ = "feedback"
+
+    id = Column(Integer, primary_key=True, index=True)
+    rating = Column(Integer, nullable=True)  
+    comment = Column(Text, nullable=True)
+    announcement_id = Column(
+        Integer, ForeignKey("announcements.id", ondelete="CASCADE"), nullable=True
+    )
+    service_id = Column(
+        Integer, ForeignKey("services.id", ondelete="CASCADE"), nullable=True
+    )
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    announcement = relationship("Announcement", back_populates="feedback")
+    service = relationship("Service", back_populates="feedback")
+
+
+class Comment(Base):
+    __tablename__ = "comments"
+
+    id = Column(Integer, primary_key=True, index=True)
+    content = Column(Text, nullable=False)
+    announcement_id = Column(
+        Integer, ForeignKey("announcements.id", ondelete="CASCADE"), nullable=True
+    )
+    service_id = Column(
+        Integer, ForeignKey("services.id", ondelete="CASCADE"), nullable=True
+    )
+    created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+
+    announcement = relationship("Announcement", back_populates="comments")
+    service = relationship("Service", back_populates="comments")
+
+
 class User(Base):
     __tablename__ = "users"
 
@@ -52,6 +87,10 @@ class Announcement(Base):
     
     links = relationship("AnnouncementLink", back_populates="announcement", cascade="all, delete-orphan")
     user = relationship("User", back_populates="announcements")
+    feedback = relationship(
+        "Feedback", back_populates="service", cascade="all, delete-orphan")
+    comments = relationship(
+        "Comment", back_populates="service", cascade="all, delete-orphan")
 
 
 class AnnouncementLink(Base):
@@ -132,6 +171,10 @@ class Service(Base):
     attributes = relationship(
         "ServiceAttribute", back_populates="service", cascade="all, delete"
     )
+    feedback = relationship(
+        "Feedback", back_populates="service", cascade="all, delete-orphan")
+    comments = relationship(
+        "Comment", back_populates="service", cascade="all, delete-orphan")
     # locations = relationship(
     #     "Location", secondary=service_location, back_populates="services"
     # )
@@ -180,6 +223,17 @@ class BusinessInfoAttribute(Base):
     attribute_type = Column(String(255), nullable=False)
 
     business_info = relationship("BusinessInfo", back_populates="attributes")
+
+
+Announcement.comments = relationship("Comment", back_populates="announcement", cascade="all, delete-orphan")
+
+Service.comments = relationship("Comment", back_populates="service", cascade="all, delete-orphan")
+
+Announcement.feedback = relationship("Feedback", back_populates="announcement", cascade="all, delete-orphan")
+
+Service.feedback = relationship("Feedback", back_populates="service", cascade="all, delete-orphan")
+
+
 
 # not yet implemented dunno if needed
 # class Location(Base):

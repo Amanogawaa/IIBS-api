@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 # utils
 from api.file_handling import file_handling
+from api.schema.feedback import Feedback
 from api.utils import JWT_Bearer
 from api.form_parser import parse_announcement_form, service_form
 
@@ -25,6 +26,8 @@ import api.crud.service as service
 import api.crud.announcement as announcements
 import api.crud.faqs as faqs
 import api.crud.business_info as infos
+import api.crud.feedback as feed
+
 
 Routes = APIRouter()
 
@@ -34,6 +37,7 @@ def con_db():
         yield db
     finally:
         db.close()
+
 
 
 """
@@ -214,3 +218,28 @@ async def update_info(info_id: int, info_data: BusinessInfoCreate, db: Session =
 @Routes.delete("/information/{info_id}", tags=["information"], dependencies=[Depends(JWT_Bearer())])
 async def delete_info(info_id: int, db: Session = Depends(con_db)):
     return infos.delete_information(db, info_id)
+
+
+"""
+General Feedback
+"""
+
+@Routes.get('/feedback/', tags=['feedback'])
+async def get_feedbacks(db: Session = Depends(con_db)):
+    return feed.get_all_feedback(db)
+
+@Routes.get('/feedback/{feed_id}', tags=['feedback'])
+async def get_feedbacks(db: Session = Depends(con_db)):
+    return feed.get_all_feedback(db)
+
+@Routes.post('/feedback/', tags=['feedback'])
+async def make_feedback(feedback: Feedback,db: Session = Depends(con_db)):
+    return feed.create_feedback(db, feedback)
+
+@Routes.post('/announcements/{announcement_id}/feedback/', tags=['feedback'])
+async def make_announcement_feedback(announcement_id: int, feedback: Feedback, db: Session = Depends(con_db)):
+    return feed.create_feedback(db, feedback, announcement_id=announcement_id)
+
+@Routes.post('/services/{service_id}/feedback/', tags=['feedback'])
+async def make_service_feedback(service_id: int, feedback: Feedback, db: Session = Depends(con_db)):
+    return feed.create_feedback(db, feedback, service_id=service_id)
