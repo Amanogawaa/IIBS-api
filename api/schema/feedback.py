@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 
 class Feedback(BaseModel):
     rating: int
+    user_name: Optional[str] = None
     comment: str
 
 

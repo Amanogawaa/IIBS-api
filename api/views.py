@@ -1,6 +1,5 @@
 import json
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
-from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from fastapi import APIRouter, Depends, HTTPException, Request, UploadFile, File, Form
 from sqlalchemy.orm import Session
 
 # utils
@@ -27,6 +26,7 @@ import api.crud.announcement as announcements
 import api.crud.faqs as faqs
 import api.crud.business_info as infos
 import api.crud.feedback as feed
+import api.crud.analytics as analytics
 
 
 Routes = APIRouter()
@@ -232,6 +232,26 @@ async def get_feedbacks(db: Session = Depends(con_db)):
 async def get_feedbacks(db: Session = Depends(con_db)):
     return feed.get_all_feedback(db)
 
+@Routes.get('/general/feedback/', tags=['feedback'])
+async def get_general_feedback(db: Session = Depends(con_db)):
+    return feed.get_general_feedback(db)
+
+@Routes.get('/services/feedback/', tags=['feedback'])
+async def get_services_feedback(db: Session = Depends(con_db)):
+    return feed.get_service_feedback(db)
+
+@Routes.get('/services/{service_id}/feedback/', tags=['feedback'])
+async def get_service_feedback(service_id: int, db: Session = Depends(con_db)):
+    return feed.get_service_feedback(db, service_id)
+
+@Routes.get('/annoucements/feedback/', tags=['feedback'])
+async def get_announcements_feedback(db: Session = Depends(con_db)):
+    return feed.get_annoucement_feedback(db)
+
+@Routes.get('/annoucements/{annoucement_id}/feedback/', tags=['feedback'])
+async def get_announcement_feedback(annoucement_id: int, db: Session = Depends(con_db)):
+    return feed.get_annoucement_feedback(db, annoucement_id)
+
 @Routes.post('/feedback/', tags=['feedback'])
 async def make_feedback(feedback: Feedback,db: Session = Depends(con_db)):
     return feed.create_feedback(db, feedback)
@@ -243,3 +263,49 @@ async def make_announcement_feedback(announcement_id: int, feedback: Feedback, d
 @Routes.post('/services/{service_id}/feedback/', tags=['feedback'])
 async def make_service_feedback(service_id: int, feedback: Feedback, db: Session = Depends(con_db)):
     return feed.create_feedback(db, feedback, service_id=service_id)
+
+"""
+Analytics
+"""
+
+@Routes.post('/analytics/track_visit/', tags=['analytics'])
+async def visit(
+    request: Request, 
+    page: str,
+    db: Session = Depends(con_db)
+):
+    return analytics.track_visit(request, page, db)
+
+@Routes.post('/analytics/track_activity/', tags=['analytics'])
+async def activity(
+    request: Request,
+    db: Session = Depends(con_db),
+    announcement_id: Optional[int] = None,
+    activity_type: str = "click",
+    service_id: Optional[int] = None,
+):
+    return analytics.track_interaction(request, db, activity_type, announcement_id, service_id)
+
+@Routes.get("/analytics/visits/daily",tags=['analytics'], response_model=List[dict],  dependencies=[Depends(JWT_Bearer())])
+async def get_daily_visits(
+    days: int = 30,
+    db: Session = Depends(con_db),
+):
+    return analytics.get_daily_activity(db, days)
+    
+
+@Routes.get("/analytics/top-services", tags=['analytics'], dependencies=[Depends(JWT_Bearer())])
+async def get_top_services(
+    limit: int = 10,
+    days: int = 30,
+    db: Session = Depends(con_db),
+):
+   return analytics.get_top_service( db, days, limit)
+
+@Routes.get("/analytics/top-announcements",tags=['analytics'],  dependencies=[Depends(JWT_Bearer())])
+async def get_top_announcements(
+    limit: int = 10,
+    days: int = 30,
+    db: Session = Depends(con_db),
+):
+    return analytics.get_top_announcement( db, days, limit)

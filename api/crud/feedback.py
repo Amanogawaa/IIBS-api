@@ -33,6 +33,55 @@ def get_all_feedback(db: Session, feed_id: Optional[int | None] = None):
         message="Requirements fetched successfully", data=reqs_response, status_code=200
     )
 
+def get_general_feedback(db: Session):
+    query = db.query(models.Feedback).filter(models.Feedback.service_id.is_(None), models.Feedback.announcement_id.is_(None))
+
+    reqs = query.all()
+
+    if not reqs:
+        raise HTTPException(status_code=404, detail="No General Feedback found")
+    
+    reqs_response = [FeedbackResponse.model_validate(req, from_attributes=True) for req in reqs]
+
+    return ResponseModel(
+        message="General feedback fetched successfully", data=reqs_response, status_code=200
+    )
+
+
+def get_service_feedback(db: Session, service_id: Optional[int | None] = None):
+    query = db.query(models.Feedback).filter(models.Feedback.service_id.isnot(None))  
+
+    if service_id:
+        query = query.filter(models.Feedback.service_id == service_id)
+
+    reqs = query.all()
+
+    if not reqs:
+        raise HTTPException(status_code=404, detail="No Feedback found for this service")
+
+    reqs_response = [FeedbackResponse.model_validate(req, from_attributes=True) for req in reqs]
+
+    return ResponseModel(
+        message="Service feedback fetched successfully", data=reqs_response, status_code=200
+    )
+
+def get_annoucement_feedback(db: Session, announcement_id: Optional[int | None] = None):
+    query = db.query(models.Feedback).filter(models.Feedback.announcement_id.isnot(None))  
+
+    if announcement_id:
+        query = query.filter(models.Feedback.announcement_id == announcement_id)
+
+    reqs = query.all()
+
+    if not reqs:
+        raise HTTPException(status_code=404, detail="No Feedback found for this announcement")
+
+    reqs_response = [FeedbackResponse.model_validate(req, from_attributes=True) for req in reqs]
+
+    return ResponseModel(
+        message="Announcement feedback fetched successfully", data=reqs_response, status_code=200
+    )
+
 def create_feedback(
     db: Session, feedback: Feedback, announcement_id: Optional[int] = None, service_id: Optional[int] = None
 ):

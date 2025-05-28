@@ -83,7 +83,6 @@ def create_announcement(
         name=announcement_data.name,
         description=announcement_data.description,
         image_path=image_path,
-        is_urgent=announcement_data.is_urgent, 
         platform=announcement_data.platform,
         user_id=announcement_data.user_id,
     )

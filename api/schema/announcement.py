@@ -1,4 +1,4 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, computed_field
 from typing import Dict, List, Optional
 from datetime import datetime
 
@@ -12,6 +12,15 @@ class AnnouncementBase(BaseModel):
     image_path: Optional[str] = None
     platform: str
     user_id: int
+
+    @computed_field
+    @property
+    def image_url(self) -> Optional[str]:
+        if self.image_path:
+            base_url = "http://127.0.0.1:8000" 
+            return f"{base_url}/{self.image_path}"
+        return None
+
 
 class AnnouncementCreate(AnnouncementBase):
     pass

@@ -3,12 +3,6 @@ from sqlalchemy.orm import relationship
 from api.database import Base
 from datetime import datetime, timezone
 
-# service_location = Table(
-#     "service_location",
-#     Base.metadata,
-#     Column("service_id", Integer, ForeignKey("services.id", ondelete="CASCADE"), primary_key=True),
-#     Column("location_id", Integer, ForeignKey("locations.id", ondelete="CASCADE"), primary_key=True)
-# )
 
 class Feedback(Base):
     __tablename__ = "feedback"
@@ -16,6 +10,7 @@ class Feedback(Base):
     id = Column(Integer, primary_key=True, index=True)
     rating = Column(Integer, nullable=True)  
     comment = Column(Text, nullable=True)
+    user_name = Column(String(255), nullable=True)
     announcement_id = Column(
         Integer, ForeignKey("announcements.id", ondelete="CASCADE"), nullable=True
     )
@@ -175,10 +170,6 @@ class Service(Base):
         "Feedback", back_populates="service", cascade="all, delete-orphan")
     comments = relationship(
         "Comment", back_populates="service", cascade="all, delete-orphan")
-    # locations = relationship(
-    #     "Location", secondary=service_location, back_populates="services"
-    # )
-    # download = relationship("Download", back_populates="services", cascade="all, delete")
     
 class ServiceAttribute(Base):
     __tablename__ = "service_attributes"
@@ -233,43 +224,17 @@ Announcement.feedback = relationship("Feedback", back_populates="announcement", 
 
 Service.feedback = relationship("Feedback", back_populates="service", cascade="all, delete-orphan")
 
+class UserActivity(Base):
+    __tablename__ = "user_activities"
 
-
-# not yet implemented dunno if needed
-# class Location(Base):
-#     __tablename__ = "locations"
-
-#     id = Column(Integer, primary_key=True, index=True)
-#     name = Column(String(255), nullable=False, unique=True)
-#     description = Column(Text, nullable=False)
-#     status = Column(String(255), nullable=False, default="active")
-#     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-#     updated_at = Column(
-#         DateTime,
-#         default=lambda: datetime.now(timezone.utc),
-#         onupdate=lambda: datetime.now(timezone.utc),
-#     )
-
-#     services = relationship(
-#         "Service", secondary=service_location, back_populates="locations"
-#     )
-
-# class Download(Base):
-#     __tablename__ = "downloads"
-
-#     id = Column(Integer, primary_key=True, index=True)
-#     name = Column(String(255), nullable=False, unique=True)
-#     file = Column(String(255), nullable=False, unique=True)
-#     description = Column(Text, nullable=False)
-#     category = Column(String(255), nullable=False)
-#     service_id = Column(Integer,  ForeignKey("services.id", ondelete="CASCADE"), nullable=False)
-#     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
-#     updated_at = Column(
-#         DateTime,
-#         default=lambda: datetime.now(timezone.utc),
-#         onupdate=lambda: datetime.now(timezone.utc),
-#     )
-
-#     services = relationship(
-#         "Service", back_populates="download", cascade="all, delete"
-#     )
+    id = Column(Integer, primary_key=True, index=True)
+    activity_type = Column(String(50), nullable=False) 
+    page = Column(String(255), nullable=True)
+    ip_address = Column(String(50), nullable=True)
+    user_agent = Column(String(255), nullable=True)
+    announcement_id = Column(Integer, ForeignKey("announcements.id", ondelete="SET NULL"), nullable=True)
+    service_id = Column(Integer, ForeignKey("services.id", ondelete="SET NULL"), nullable=True)
+    timestamp = Column(DateTime, default=lambda: datetime.now(timezone.utc))
+    
+    announcement = relationship("Announcement")
+    service = relationship("Service")

@@ -10,7 +10,7 @@ import os
 load_dotenv()
 
 ALGORITHM = 'HS256'
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7
 REFRESH_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7
 secret_key = os.getenv("JWT_SECRET_KEY")
 refresh_key = os.getenv("JWT_REFRESH_KEY")
