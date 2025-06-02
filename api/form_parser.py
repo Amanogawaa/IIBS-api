@@ -1,6 +1,7 @@
 from fastapi import Form
 from api.schema.announcement import AnnouncementCreate
 from api.schema.service import ServiceCreate
+from api.schema.business_info import BusinessInfoCreate
 
 async def parse_announcement_form(
    name: str = Form(...),
@@ -28,4 +29,13 @@ async def service_form(
         status=status,
         user_id=user_id,
         category_id=category_id,
+    )
+
+async def business_info_form(
+        name: str = Form(...),
+        description: str = Form(...),
+) -> BusinessInfoCreate:
+    return  BusinessInfoCreate(
+        name=name,
+        description= description,
     )

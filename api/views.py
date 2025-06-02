@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from api.file_handling import file_handling
 from api.schema.feedback import Feedback
 from api.utils import JWT_Bearer
-from api.form_parser import parse_announcement_form, service_form
+from api.form_parser import parse_announcement_form, service_form, business_info_form
 
 # schemas
 from api.database import SessionLocal
@@ -207,9 +207,9 @@ async def get_infos(db: Session = Depends(con_db)):
 async def get_infos(info_id: int, db: Session = Depends(con_db)):
     return infos.get_information(db, info_id)
 
-@Routes.post('/information/', tags=['information'], dependencies=[Depends(JWT_Bearer())])
-async def creat_information(info_data: BusinessInfoCreate, db: Session = Depends(con_db)):
-    return infos.createInfo(db, info_data, info_data.attributes)
+@Routes.post('/information/', tags=['information'] ,dependencies=[Depends(JWT_Bearer())])
+async def creat_information(info_data: BusinessInfoCreate = Depends(business_info_form),file: Optional[UploadFile] = File(None) ,db: Session = Depends(con_db)):
+    return infos.createInfo(db, info_data, file)
 
 @Routes.put("/information/{info_id}", tags=["information"], dependencies=[Depends(JWT_Bearer())])
 async def update_info(info_id: int, info_data: BusinessInfoCreate, db: Session = Depends(con_db)):
