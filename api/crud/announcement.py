@@ -157,8 +157,6 @@ def update_announcement(
         db_announcement.name = announcement_data.name
     if announcement_data.description is not None:
         db_announcement.description = announcement_data.description
-    if announcement_data.is_urgent is not None:
-        db_announcement.is_urgent = announcement_data.is_urgent
     if announcement_data.platform is not None:
         db_announcement.platform = announcement_data.platform
     if announcement_data.user_id is not None:
