@@ -15,21 +15,24 @@ from api.schema.service import *
 UPLOAD_DIR = "uploads/service/"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-def get_service(db: Session, service_id: Optional[int | None] = None):
+def get_service(db: Session, service_id: Optional[int] = None):
     query = db.query(models.Service)
-
-    if service_id:
-        query = query.filter(models.Service.id == service_id)
-
-    services = query.all()
-
-    if not services:
-        raise HTTPException(status_code=404, detail='Service not found')
     
+    if service_id:
+        service = query.filter(models.Service.id == service_id).first()
+        if not service:
+            raise HTTPException(status_code=404, detail="Service not found")
+        return ResponseModel(
+            message='Service found',
+            data=ServiceResponse.model_validate(service, from_attributes=True),
+            status_code=200
+        )
+    
+    services = query.all()
     service_response = [ServiceResponse.model_validate(service, from_attributes=True) for service in services]
-
+    
     return ResponseModel(
-        message='Successfully get all services',
+        message='Successfully retrieved services',
         data=service_response,
         status_code=200
     )

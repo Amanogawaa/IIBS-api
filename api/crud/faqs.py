@@ -7,21 +7,23 @@ from typing import Union, Optional
 from api.schema.faqs import *
 from api.schema.response import ResponseModel
 
-def get_all_faqs(db: Session, faqs_id: Optional[int | None] = None):
+def get_all_faqs(db: Session, service_id: Optional[int] = None):
     query = db.query(models.Faq)
 
-    if faqs_id:
-        query = query.filter(models.Faq.id == faqs_id)
+    if service_id:
+        query = query.filter(models.Faq.service_id == service_id)
 
-    reqs = query.all()
+    faqs = query.all()
 
-    if not reqs:
-        raise HTTPException(status_code=404, detail="No FAQS found")
+    if not faqs:
+        return []
 
-    reqs_response = [Faq.model_validate(req, from_attributes=True) for req in reqs]
+    faqs_response = [Faq.model_validate(faq, from_attributes=True) for faq in faqs]
 
     return ResponseModel(
-        message="Requirements fetched successfully", data=reqs_response, status_code=200
+        message="FAQs fetched successfully",
+        data=faqs_response,
+        status_code=200
     )
 
 def create_faq(db: Session, data: FaqCreate):

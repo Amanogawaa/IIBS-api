@@ -27,6 +27,7 @@ import api.crud.faqs as faqs
 import api.crud.business_info as infos
 import api.crud.feedback as feed
 import api.crud.analytics as analytics
+import api.crud.file_upload as file_upload
 
 
 Routes = APIRouter()
@@ -309,3 +310,7 @@ async def get_top_announcements(
     db: Session = Depends(con_db),
 ):
     return analytics.get_top_announcement( db, days, limit)
+
+@Routes.post('/image/upload', tags=['image'])
+async def upload_image( file: Optional[UploadFile] = File(None)):
+    return file_upload.save_image(file=file)

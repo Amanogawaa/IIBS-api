@@ -14,25 +14,31 @@ from PIL import Image
 UPLOAD_DIR = "uploads/announcements/"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
-def get_announcements(db: Session, announcement_id: Optional[int | None] = None):
 
+def get_announcements(db: Session, announcement_id: Optional[int] = None):
     query = db.query(models.Announcement)
 
     if announcement_id:
-        query = query.filter(models.Announcement.id == announcement_id)
+        # For specific announcement by ID, return 404 if not found
+        announcement = query.filter(models.Announcement.id == announcement_id).first()
+        if not announcement:
+            raise HTTPException(status_code=404, detail="Announcement not found")
+        
+        return ResponseModel(
+            message="Announcement found",
+            data=AnnouncementResponse.model_validate(announcement, from_attributes=True),
+            status_code=200,
+        )
 
-    announcements = query.all()        
-
-    if not announcements:
-        raise HTTPException(status_code=404, detail="Announcements not found")
-
+    # For "get all" operations, return empty array if none found
+    announcements = query.all()
     announcement_response = [
-        AnnouncementResponse.model_validate(announcement)
+        AnnouncementResponse.model_validate(announcement, from_attributes=True)
         for announcement in announcements
     ]
 
     return ResponseModel(
-        message="Announcements Found" if announcement_id else "All Announcements",
+        message="All announcements fetched successfully",
         data=announcement_response,
         status_code=200,
     )

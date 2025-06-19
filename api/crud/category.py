@@ -7,17 +7,23 @@ from fastapi import HTTPException
 from api.schema.response import ResponseModel
 from api.schema.category import *
 
-def getCategories(db: Session, category_id: Optional[int | None]= None):
+def getCategories(db: Session, category_id: Optional[int] = None):
     query = db.query(models.Category)
 
     if category_id:
-        query = query.filter(models.Category.id == category_id)
-
-    categories = query.all()
-
-    if not categories:
-        raise HTTPException(status_code=404, detail="No Category found")
+        # For specific category by ID, return 404 if not found
+        category = query.filter(models.Category.id == category_id).first()
+        if not category:
+            raise HTTPException(status_code=404, detail="Category not found")
+        
+        return ResponseModel(
+            message="Category found",
+            data=CategoryResponse.model_validate(category, from_attributes=True),
+            status_code=200,
+        )
     
+    # For "get all" operations, return empty array if none found
+    categories = query.all()
     category_response = [CategoryResponse.model_validate(
         cat, from_attributes=True
     ) for cat in categories]
@@ -69,6 +75,12 @@ def deleteCategory(db: Session, cat_id: int) -> ResponseModel:
 
     if not query:
         raise HTTPException(status_code=404, detail="Category not found")
+
+    services_count = db.query(models.Service).filter(models.Service.category_id == cat_id).count()
+    if services_count > 0:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Cannot delete category. There are {services_count} services still connected to this category. Please reassign or delete these services first.")
 
     db.delete(query)
     db.commit()
