@@ -311,6 +311,10 @@ async def get_top_announcements(
 ):
     return analytics.get_top_announcement( db, days, limit)
 
-@Routes.post('/image/upload', tags=['image'])
-async def upload_image( file: Optional[UploadFile] = File(None)):
-    return file_upload.save_image(file=file)
+@Routes.post('/image/upload', tags=['file upload'])
+async def upload_image( UploadFiles: Optional[UploadFile] = File(None)):
+    return file_upload.upload_image(file=UploadFiles)
+
+@Routes.post('/video/upload', tags=['file upload'])
+async def upload_video( UploadFiles: Optional[UploadFile] = File(None)):
+    return file_upload.upload_video(file=UploadFiles)
