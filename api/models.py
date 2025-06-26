@@ -61,6 +61,9 @@ class User(Base):
     services = relationship(
         "Service", back_populates="user", cascade="all, delete"
     )
+    business_info = relationship(
+        "BusinessInfo", back_populates="user", cascade="all, delete"
+    )
 
 class Announcement(Base):
     __tablename__ = "announcements"
@@ -80,25 +83,12 @@ class Announcement(Base):
         onupdate=lambda: datetime.now(timezone.utc),
     )
     
-    links = relationship("AnnouncementLink", back_populates="announcement", cascade="all, delete-orphan")
     user = relationship("User", back_populates="announcements")
     feedback = relationship(
         "Feedback", back_populates="service", cascade="all, delete-orphan")
     comments = relationship(
         "Comment", back_populates="service", cascade="all, delete-orphan")
 
-
-class AnnouncementLink(Base):
-    __tablename__ = "announcement_links"
-
-    id = Column(Integer, primary_key=True, index=True)
-    announcement_id = Column(
-        Integer, ForeignKey("announcements.id", ondelete="CASCADE"), nullable=False
-    )
-    url = Column(String(255), nullable=False)  
-    title = Column(String(255), nullable=True) 
-
-    announcement = relationship("Announcement", back_populates="links")
 
 class Faq(Base):
     __tablename__ = "faqs"
@@ -163,34 +153,47 @@ class Service(Base):
     category = relationship("Category", back_populates="services")
     user = relationship("User", back_populates="services")
     faqs = relationship("Faq", back_populates="service", cascade="all, delete")
-    attributes = relationship(
-        "ServiceAttribute", back_populates="service", cascade="all, delete"
-    )
     feedback = relationship(
         "Feedback", back_populates="service", cascade="all, delete-orphan")
     comments = relationship(
         "Comment", back_populates="service", cascade="all, delete-orphan")
     
-class ServiceAttribute(Base):
-    __tablename__ = "service_attributes"
-
-    id = Column(Integer, primary_key=True, index=True)
-    service_id = Column(
-        Integer, ForeignKey("services.id", ondelete="CASCADE"), nullable=False, index=True
-    )
-    attribute_name = Column(String(255), nullable=False)
-    attribute_value = Column(Text, nullable=False)
-    attribute_type = Column(String(255), nullable=False)
-
-    service = relationship("Service", back_populates="attributes")
 
 class BusinessInfo(Base):
     __tablename__ = "business_info"
-
+    
     id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    
+    # Core Public Information
     name = Column(String(255), nullable=False, unique=True)
     logo = Column(String(255), nullable=True)
     description = Column(Text, nullable=False)
+    tagline = Column(String(255), nullable=True)
+    
+    # Contact & Location
+    email = Column(String(255), nullable=True)
+    phone = Column(String(50), nullable=True)
+    website = Column(String(255), nullable=True)
+    address = Column(Text, nullable=True)
+    city = Column(String(100), nullable=True)
+    state = Column(String(100), nullable=True)
+    country = Column(String(100), nullable=True)
+    postal_code = Column(String(20), nullable=True)
+    
+    # Business Details
+    industry = Column(String(100), nullable=True)
+    business_type = Column(String(50), nullable=True) 
+    founded_date = Column(DateTime, nullable=True)
+    employee_count_range = Column(String(50), nullable=True)
+    
+    # Operating Information
+    business_hours = Column(Text, nullable=True)  
+    timezone = Column(String(50), nullable=True)
+    
+    # Social & Online Presence
+    social_media = Column(Text, nullable=True) 
+    
     created_at = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     updated_at = Column(
         DateTime,
@@ -198,22 +201,7 @@ class BusinessInfo(Base):
         onupdate=lambda: datetime.now(timezone.utc),
     )
 
-    attributes = relationship(
-        "BusinessInfoAttribute", back_populates="business_info", cascade="all, delete"
-    )
-
-class BusinessInfoAttribute(Base):
-    __tablename__ = "business_info_attributes"
-
-    id = Column(Integer, primary_key=True, index=True)
-    business_info_id = Column(
-        Integer, ForeignKey("business_info.id", ondelete="CASCADE"), nullable=False, index=True
-    )
-    attribute_name = Column(String(255), nullable=False)
-    attribute_value = Column(Text, nullable=False)
-    attribute_type = Column(String(255), nullable=False)
-
-    business_info = relationship("BusinessInfo", back_populates="attributes")
+    user = relationship("User", back_populates="business_info")
 
 
 Announcement.comments = relationship("Comment", back_populates="announcement", cascade="all, delete-orphan")

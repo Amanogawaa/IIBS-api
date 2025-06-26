@@ -9,8 +9,8 @@ import shutil
 
 from api.schema.image import ImageResponse, VideoResponse
 
-UPLOAD_DIR = "uploads/editor/"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+IMAGE_UPLOAD_DIR = "uploads/editor/"
+os.makedirs(IMAGE_UPLOAD_DIR, exist_ok=True)
 
 def upload_image(file: Optional[UploadFile] = File(None)):
     if not file:
@@ -23,7 +23,7 @@ def upload_image(file: Optional[UploadFile] = File(None)):
             raise HTTPException(status_code=400, detail="Invalid image file type")
         
         unique_filename = f"{uuid4().hex}.{file_ext}"
-        image_path = os.path.join(UPLOAD_DIR, unique_filename)
+        image_path = os.path.join(IMAGE_UPLOAD_DIR, unique_filename)
         
         # Save the file temporarily
         temp_path = image_path + ".temp"
@@ -61,8 +61,8 @@ def upload_image(file: Optional[UploadFile] = File(None)):
     finally:
         file.file.close()
 
-UPLOAD_DIR = "uploads/video/"
-os.makedirs(UPLOAD_DIR, exist_ok=True)    
+VIDEO_UPLOAD_DIR = "uploads/video/"
+os.makedirs(VIDEO_UPLOAD_DIR, exist_ok=True)    
 
 def upload_video(file: UploadFile = File(...)):
     video_path = None
@@ -75,9 +75,9 @@ def upload_video(file: UploadFile = File(...)):
         file_ext = file.filename.split(".")[-1].lower()
         if file_ext not in allowed_extensions:
             raise HTTPException(status_code=400, detail="Invalid video file type")
-        
+
         unique_filename = f"{uuid4().hex}.{file_ext}"   
-        video_path = os.path.join(UPLOAD_DIR, unique_filename)
+        video_path = os.path.join(VIDEO_UPLOAD_DIR, file.filename)
         
         # Save the file
         with open(video_path, "wb") as buffer:
@@ -86,10 +86,10 @@ def upload_video(file: UploadFile = File(...)):
         
         # Create response
         response = VideoResponse(
-            video_path=f"uploads/video/{unique_filename}",
-            name=unique_filename,
+            video_path=f"uploads/video/{file.filename}",
+            name=file.filename,
             size=os.path.getsize(video_path),
-            type=f"video/{file_ext}",
+            type=f"video/{file_ext}",   
         )
         
         return response

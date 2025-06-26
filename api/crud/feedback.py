@@ -125,6 +125,7 @@ def create_feedback(
     db_feedback = models.Feedback(
         rating=feedback.rating,
         comment=feedback.comment,
+        user_name=feedback.user_name,
         announcement_id=announcement_id,
         service_id=service_id,
     )

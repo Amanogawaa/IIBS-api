@@ -31,11 +31,62 @@ async def service_form(
         category_id=category_id,
     )
 
+from datetime import date
+from typing import Optional
+from fastapi import Form
+
 async def business_info_form(
-        name: str = Form(...),
-        description: str = Form(...),
+    name: str = Form(...),
+    description: str = Form(...),
+    tagline: Optional[str] = Form(None),
+    user_id: int = Form(...),
+
+    email: Optional[str] = Form(None),
+    phone: Optional[str] = Form(None),
+    website: Optional[str] = Form(None),
+    address: Optional[str] = Form(None),
+    city: Optional[str] = Form(None),
+    state: Optional[str] = Form(None),
+    country: Optional[str] = Form(None),
+    postal_code: Optional[str] = Form(None),
+    
+    industry: Optional[str] = Form(None),
+    business_type: Optional[str] = Form(None),
+    founded_date: Optional[date] = Form(None),
+    employee_count_range: Optional[str] = Form(None),
+
+    business_hours: Optional[str] = Form(None), 
+    timezone: Optional[str] = Form(None),
+    
+    social_media: Optional[str] = Form(None), 
 ) -> BusinessInfoCreate:
-    return  BusinessInfoCreate(
+    return BusinessInfoCreate(
+        # Core Public Information
         name=name,
-        description= description,
+        description=description,
+        tagline=tagline,
+        user_id=user_id,
+        
+        # Contact & Location
+        email=email,
+        phone=phone,
+        website=website,
+        address=address,
+        city=city,
+        state=state,
+        country=country,
+        postal_code=postal_code,
+        
+        # Business Details
+        industry=industry,
+        business_type=business_type,
+        founded_date=founded_date,
+        employee_count_range=employee_count_range,
+        
+        # Operating Information
+        business_hours=business_hours,
+        timezone=timezone,
+        
+        # Social & Online Presence
+        social_media=social_media,
     )

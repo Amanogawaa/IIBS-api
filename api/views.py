@@ -208,7 +208,11 @@ async def get_infos(db: Session = Depends(con_db)):
 async def get_infos(info_id: int, db: Session = Depends(con_db)):
     return infos.get_information(db, info_id)
 
-@Routes.post('/information/', tags=['information'] ,dependencies=[Depends(JWT_Bearer())])
+@Routes.get('/information/users/{user_id}', response_model=bool, tags=['information'])
+async def does_exist(user_id: int, db: Session = Depends(con_db)):
+    return infos.business_info_exists_by_user(db, user_id)
+
+@Routes.post('/information/', tags=['information'] )
 async def creat_information(info_data: BusinessInfoCreate = Depends(business_info_form),file: Optional[UploadFile] = File(None) ,db: Session = Depends(con_db)):
     return infos.createInfo(db, info_data, file)
 
@@ -275,7 +279,7 @@ async def visit(
     page: str,
     db: Session = Depends(con_db)
 ):
-    return analytics.track_visit(request, page, db)
+    return analytics.track_visit(db, request, page)
 
 @Routes.post('/analytics/track_activity/', tags=['analytics'])
 async def activity(
@@ -283,7 +287,7 @@ async def activity(
     db: Session = Depends(con_db),
     announcement_id: Optional[int] = None,
     activity_type: str = "click",
-    service_id: Optional[int] = None,
+    service_id: Optional[int] = None
 ):
     return analytics.track_interaction(request, db, activity_type, announcement_id, service_id)
 
@@ -296,21 +300,57 @@ async def get_daily_visits(
     
 
 @Routes.get("/analytics/top-services", tags=['analytics'], dependencies=[Depends(JWT_Bearer())])
-async def get_top_services(
+async def get_top_service(
     limit: int = 10,
     days: int = 30,
     db: Session = Depends(con_db),
 ):
-   return analytics.get_top_service( db, days, limit)
+   return analytics.get_top_services( db, days, limit)
 
 @Routes.get("/analytics/top-announcements",tags=['analytics'],  dependencies=[Depends(JWT_Bearer())])
-async def get_top_announcements(
+async def get_top_announcement(
     limit: int = 10,
     days: int = 30,
     db: Session = Depends(con_db),
 ):
-    return analytics.get_top_announcement( db, days, limit)
+    return analytics.get_top_announcements( db, days, limit)
 
+@Routes.get("/analytics/popular-pages", tags=['analytics'])
+async def get_popular_pages_endpoint(
+    db: Session = Depends(con_db),
+    days: int = 30,
+    limit: int = 10
+):
+    """Get most popular pages"""
+    return analytics.get_popular_pages(db, days, limit)
+
+@Routes.get("/analytics/summary",  tags=['analytics'],)
+async def get_activity_summary_endpoint(
+    db: Session = Depends(con_db),
+    days: int = 30
+):
+    """Get activity summary"""
+    return analytics.get_activity_summary(db, days)
+
+@Routes.get("/analytics/top-service-ratings", tags=['analytics'], dependencies=[Depends(JWT_Bearer())])
+async def get_top_service_ratings(
+    db: Session = Depends(con_db),
+):
+    return analytics.get_service_ratings(db)
+
+@Routes.get("/analytics/top-announcement-ratings", tags=['analytics'], dependencies=[Depends(JWT_Bearer())])
+async def get_top_announcement_ratings(
+    db: Session = Depends(con_db),
+):
+    return analytics.get_announcement_ratings(db)
+
+@Routes.get("/analytics/overall-rating", tags=['analytics'], dependencies=[Depends(JWT_Bearer())])
+async def get_overall_rating_endpoint(db: Session = Depends(con_db)):
+    return  analytics.get_overall_rating(db)
+
+"""
+File Upload
+"""
 @Routes.post('/image/upload', tags=['file upload'])
 async def upload_image( UploadFiles: Optional[UploadFile] = File(None)):
     return file_upload.upload_image(file=UploadFiles)
