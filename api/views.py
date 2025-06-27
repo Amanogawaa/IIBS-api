@@ -217,7 +217,7 @@ async def creat_information(info_data: BusinessInfoCreate = Depends(business_inf
     return infos.createInfo(db, info_data, file)
 
 @Routes.put("/information/{info_id}", tags=["information"], dependencies=[Depends(JWT_Bearer())])
-async def update_info(info_id: int, info_data: BusinessInfoCreate, file: Optional[UploadFile] = File(None), db: Session = Depends(con_db)):
+async def update_info(info_id: int, info_data: BusinessInfoCreate = Depends(business_info_form), file: Optional[UploadFile] = File(None), db: Session = Depends(con_db)):
     return infos.update_information(db, info_id, info_data, file)
 
 @Routes.delete("/information/{info_id}", tags=["information"], dependencies=[Depends(JWT_Bearer())])
